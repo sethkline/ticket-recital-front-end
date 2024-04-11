@@ -1,0 +1,23 @@
+graph TD
+    A[Main Page] --> B[Register / Login]
+    B --> C{Email Confirmed?}
+    C -->|No| D[Send Confirmation Email]
+    D --> E[Confirm Email]
+    E --> C
+    C -->|Yes| F[Select Event]
+    F --> G[Child Verification]
+    G --> H{Child Verified?}
+    H -->|Yes| I[Select Tickets & Seats]
+    H -->|No| J[Error: Child Not Found]
+    I --> K[Review Selection]
+    K --> L[Payment Information]
+    L --> M[Confirm Purchase]
+    M --> N[Checkout Complete]
+    N --> O[Send Tickets via Email]
+
+    classDef startend fill:#f9f,stroke:#333,stroke-width:4px;
+    classDef operation fill:#bbf,stroke:#f66,stroke-width:2px;
+    classDef condition fill:#fff,stroke:#333,stroke-width:2px;
+    class A,B,N startend;
+    class C,H condition;
+    class D,E,F,G,I,J,K,L,M,O operation;
