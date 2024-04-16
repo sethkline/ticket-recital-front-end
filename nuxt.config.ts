@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   },
   css: ['~/assets/css/main.css'],
   devtools: { enabled: true },
-  modules: ['@nuxtjs/strapi', '@pinia/nuxt', 'nuxt-primevue'],
+  modules: ['@nuxtjs/strapi', '@pinia/nuxt', 'nuxt-primevue', 'nuxt-socket-io'],
     strapi: {
       url: process.env.STRAPI_URL || 'http://localhost:1337',
       prefix: '/api',
@@ -48,5 +48,19 @@ export default defineNuxtConfig({
         unstyled: true
       },
       importPT: { from: path.resolve(__dirname, './presets/lara/') }
+  },
+  io: {
+    sockets: [{
+      name: 'main',
+      url: 'http://localhost:1337'
+    }]
+  },
+  runtimeConfig: {
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    ENDPOINT_SECRET: process.env.ENDPOINT_SECRET,
+    public: {
+      STRIPE_KEY: process.env.STRIPE_KEY
+    }
   }
+
 })
