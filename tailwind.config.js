@@ -8,6 +8,7 @@ module.exports = {
     "./error.vue",
     "./presets/**/*"
   ],
+  darkMode: 'selector',
   theme: {
     extend: {
         colors: {
