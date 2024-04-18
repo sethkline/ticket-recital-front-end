@@ -33,20 +33,22 @@
                 </template>
             </StepperPanel>
             <StepperPanel header="Confirm Choices">
-                <template #content="{ prevCallback }">
-                    <div class="flex flex-col h-[12rem]">
-                        <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-md bg-surface-0 dark:bg-surface-900 flex-auto flex justify-center items-center font-medium">Content III</div>
-                    </div>
-                    <div class="flex pt-4 justify-start">
+                <template #content="{ prevCallback, nextCallback }">
+                  <!-- // summary of selected seats -->
+
+                    <OrderSummary />
+
+                    <div class="flex pt-4 justify-between">
                         <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="prevCallback" />
+                        <Button label="Checkout" icon="pi pi-arrow-right" iconPos="right" @click="nextCallback" />
                     </div>
                 </template>
             </StepperPanel>
             <StepperPanel header="Pay for seats">
                 <template #content="{ prevCallback }">
-                    <div class="flex flex-col h-[12rem]">
-                        <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded-md bg-surface-0 dark:bg-surface-900 flex-auto flex justify-center items-center font-medium">Content III</div>
-                    </div>
+                  
+                    <!-- show the stripe checkout -->
+                    <PaymentCheckout />
                     <div class="flex pt-4 justify-start">
                         <Button label="Back" severity="secondary" icon="pi pi-arrow-left" @click="prevCallback" />
                     </div>
@@ -66,6 +68,7 @@
   import { useSeatStore } from '~/stores/seatStore';
 import type { SeatResponse } from '~/types/seat';
 import { useCheckoutStore } from '~/stores/checkoutStore';
+// import { PaymentCheckout } from '#build/components';
 
 // This is causing a 500 error not sure why
 // const { find } = useStrapi()

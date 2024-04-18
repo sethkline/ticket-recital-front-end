@@ -56,10 +56,8 @@ export default defineNuxtConfig({
     }]
   },
   runtimeConfig: {
-    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-    ENDPOINT_SECRET: process.env.ENDPOINT_SECRET,
     public: {
-      STRIPE_KEY: process.env.STRIPE_KEY
+      STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY
     }
   }
 

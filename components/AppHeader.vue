@@ -10,7 +10,6 @@
             <time dateTime="2022-04-04">Reverence Studios Dance Recital - </time>
             <time dateTime="2022-04-06">May 18, 2024</time>
           </p>
-          <DiamondIcon class="h-1.5 w-1.5 overflow-visible fill-current stroke-current" />
           <p>Mechanicsburg, PA</p>
         </div>
       </div>

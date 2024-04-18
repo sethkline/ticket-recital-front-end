@@ -10,6 +10,20 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
   const paymentInformation = ref({});
   const orderSummary = ref({});
 
+  const selectedEventDetailsDetails = ref({
+    morningShow: { price: 50, quantity: 1 },
+    afternoonShow: { price: 50, quantity: 1 },
+    taxRate: 0.15  // 15% tax rate for example
+  });
+
+  const orderTotal = computed(() => {
+    const morningTotal = selectedEventDetailsDetails.value.morningShow.price * selectedEventDetailsDetails.value.morningShow.quantity;
+    const afternoonTotal = selectedEventDetailsDetails.value.afternoonShow.price * selectedEventDetailsDetails.value.afternoonShow.quantity;
+    const subtotal = morningTotal + afternoonTotal;
+    const tax = subtotal * selectedEventDetailsDetails.value.taxRate;
+    return subtotal + tax; // Final total including tax
+  });
+
   const setUserInformation = (info) => {
     userInformation.value = info;
   };
@@ -56,13 +70,13 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     orderSummary.value = {};
   };
 
-  const orderTotal = computed(() => {
-    // Calculate the total cost
-    // Example calculation (adjust according to actual data structure and needs)
-    const baseCost = selectedEventDetails.value.price || 0;
-    const totalSeatsCost = selectedSeats.value.length * baseCost;
-    return totalSeatsCost; // Modify as needed for more complex calculations
-  });
+  // const orderTotal = computed(() => {
+  //   // Calculate the total cost
+  //   // Example calculation (adjust according to actual data structure and needs)
+  //   const baseCost = selectedEventDetails.value.price || 0;
+  //   const totalSeatsCost = selectedSeats.value.length * baseCost;
+  //   return totalSeatsCost; // Modify as needed for more complex calculations
+  // });
 
   const isOrderComplete = computed(() => {
     // Determine if the order can be finalized
@@ -88,6 +102,7 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     clearCheckout,
     orderTotal,
     isOrderComplete,
-    updateSelectedSeats
+    updateSelectedSeats,
+    selectedEventDetailsDetails
   };
 });
