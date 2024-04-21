@@ -6,6 +6,9 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
   const selectedEventDetails = ref({});
   const childrenInformation = ref([]);
   const selectedSeats = ref([]);
+  const selectedSeatsDetails = ref([]);
+  const selectedShow = ref()
+  const selectEventDetails = ref(null)
   const ticketQuantity = ref(0);
   const paymentInformation = ref({});
   const orderSummary = ref({});
@@ -15,6 +18,15 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     afternoonShow: { price: 50, quantity: 1 },
     taxRate: 0.15  // 15% tax rate for example
   });
+
+  const ticketQuickTotal = computed(() => {
+    return selectedSeatsDetails.value.length * 20
+  })
+
+  const ticketNumbers = computed(():string[] => {
+    if (selectedSeatsDetails.value.length === 0) return []
+    return selectedSeatsDetails.value.map(seat => seat.number)
+  })
 
   const orderTotal = computed(() => {
     const morningTotal = selectedEventDetailsDetails.value.morningShow.price * selectedEventDetailsDetails.value.morningShow.quantity;
@@ -28,19 +40,22 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     userInformation.value = info;
   };
 
-  const selectEventDetails = (eventDetails) => {
-    selectedEventDetails.value = eventDetails;
-  };
+  // const selectEventDetails = (eventDetails) => {
+  //   selectedEventDetails.value = eventDetails;
+  // };
 
   const addChildInformation = (childInfo) => {
     childrenInformation.value.push(childInfo);
   };
 
-  const updateSelectedSeats = (seatId, isReserved) => {
+  const updateSelectedSeats = (seatId, isReserved, seatDetails) => {
     if (isReserved) {
       selectedSeats.value.push(seatId);
+
+      selectedSeatsDetails.value.push(seatDetails)
     } else {
       selectedSeats.value = selectedSeats.value.filter((id) => id !== seatId);
+      selectedSeatsDetails.value = selectedSeatsDetails.value.filter((seat) => seat.id !== seatDetails.id);
     }
   }
 
@@ -93,7 +108,6 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     paymentInformation,
     orderSummary,
     setUserInformation,
-    selectEventDetails,
     addChildInformation,
     selectSeats,
     setTicketQuantity,
@@ -103,6 +117,11 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     orderTotal,
     isOrderComplete,
     updateSelectedSeats,
-    selectedEventDetailsDetails
+    selectedEventDetailsDetails,
+    selectedSeatsDetails,
+    ticketNumbers,
+    selectedShow,
+    ticketQuickTotal,
+    selectEventDetails
   };
 });

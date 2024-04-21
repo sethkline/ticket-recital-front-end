@@ -1,29 +1,12 @@
 <template>
-  <div class="w-full text-center border p-2 mb-4"><p>Stage</p></div>
- <div class="seatmap" v-if="Boolean(seats && seats.length)">
-    <div class="section">
-      <div v-for="(rowSeats, row) in leftWingSection" :key="'left-w-' + row" class="row">
-        <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat"/>
-      </div>
-    </div>
-    <div class="section section--left">
-      <div v-for="(rowSeats, row) in leftMainSection" :key="'left-' + row" class="row">
-        <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat"/>
-      </div>
-    </div>
-    <div class="section">
-      <div v-for="(rowSeats, row) in centerMainSection" :key="'center-' + row" class="row">
-        <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat"/>
-      </div>
-    </div>
-    <div class="section section--right">
-      <div v-for="(rowSeats, row) in rightMainSection" :key="'right-' + row" class="row">
-        <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat"/>
-      </div>
-    </div>
-    <div class="section">
-      <div v-for="(rowSeats, row) in rightWingSection" :key="'right-w-' + row" class="row">
-        <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat"/>
+  <div class="seatmap-container">
+    <div class="stage-label">Stage</div>
+    <div class="seatmap" v-if="Boolean(seats && seats.length)">
+      <div v-for="(section, index) in sections" :key="index" class="section" :class="getSectionClass(index)">
+        <div v-for="(rowSeats, row) in section" :key="row" class="row">
+          <span class="row-label">{{ row }}</span>
+          <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat" />
+        </div>
       </div>
     </div>
   </div>
@@ -34,9 +17,16 @@
 import { useSeatStore } from '~/stores/seatStore'
 import type { SeatResponse } from '~/types/seat';
 import { useToast } from 'primevue/usetoast';
+import SeatPicker from './SeatPicker.vue';
 const toast = useToast();
 
 const SeatStore = useSeatStore();
+
+// Utility function to convert row index to a letter (0 -> A, 1 -> B, etc.)
+function getRowLetter(index: number) {
+  console.log(index)
+  return String.fromCharCode(65 + index); // ASCII value for 'A' is 65
+}
 
 // const client = useStrapiClient();
 // const socket = io('http://localhost:1337'); // Adjust this URL to the actual URL of your Strapi server
@@ -53,6 +43,23 @@ const props = defineProps<{ seats: SeatResponse[] }>();
 // onUnmounted(() => {
 //   SeatStore.disconnectSocket();
 // });
+
+const sections = computed(() => [
+  leftWingSection.value,
+  leftMainSection.value,
+  centerMainSection.value,
+  rightMainSection.value,
+  rightWingSection.value
+]);
+
+function getSectionClass(index: number) {
+  console.log(index, 'getSectionClass')
+  switch(index) {
+    case 1: return 'section--left';
+    case 3: return 'section--right';
+    default: return '';
+  }
+}
 
 
 
@@ -110,57 +117,67 @@ const rightMainSection = computed(() => {
   return sortSeatsByDisplayOrder(rows);
 });
 
-
-
 const handleSeatToggle = async (seatId: string, isSelected: boolean, revertCallback: () => void) => {
-  // const endpoint = isSelected ? `/seats/${seatId}/reserve` : `/seats/${seatId}/unreserve`;
-  // const action = isSelected ? 'Reserving' : 'Unreserving';
-  // console.log(`${action} seat:`, seatId);
-
   try {
-    
-    const response = await SeatStore.toggleSeat(seatId, isSelected)
+    await SeatStore.toggleSeat(seatId, isSelected)
   } catch (error) {
     revertCallback();
     toast.add({severity: 'error', summary: 'Error Adding Seat', detail: 'Try selecting a different seat', life: 3000});
 }
   }
-  
-
-  // try {
-  //   const response = await SeatStore.toggleSeat(endpoint);
-  //   console.log(`${action} successful:`, response);
-  // } catch (error) {
-  //   console.error(`Error ${action.toLowerCase()} the seat:`, error);
-  // }
-// }
 </script>
 
 
 <style scoped>
+.stage-label {
+  width: 100%;
+  text-align: center;
+  padding: 1em 0;
+  font-size: 1.25em;
+  font-weight: bold;
+}
+
+.seatmap-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .seatmap {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  width: 100%;
 }
+
 .section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 20px; /* Adds horizontal space between the sections */
+  margin: 0 10px;
 }
+
 .section--right {
   align-items: flex-start;
 }
+
 .section--left {
   align-items: flex-end;
 }
+
 .row {
   display: flex;
   justify-content: center;
   margin-bottom: 1em;
 }
+
+.row-label {
+  margin-right: .5em;
+  font-weight: bold;
+}
+
 .seat {
-  margin: 0 5px; /* Adds space between seats */
+  margin: 0 5px;
 }
 </style>

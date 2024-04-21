@@ -112,6 +112,12 @@ async function fetchSeats(eventIds: string[]): Promise<void> {
   }
 }
 
+const getSeatById = (id: number) => {
+  const found = seats.value.find(seat => seat.id === id)
+  if (found) {
+    return found
+  }
+}
 async function toggleSeat(seatId: string, isReserved: boolean): Promise<void> {
   try {
     // Ensure the URL matches the route defined in the Strapi backend
@@ -120,7 +126,9 @@ async function toggleSeat(seatId: string, isReserved: boolean): Promise<void> {
       body: JSON.stringify({ isReserved }),
     });
     console.log('API response for toggling seat:', response);
-    checkoutStore.updateSelectedSeats(seatId, isReserved);
+
+    const seat = getSeatById(seatId)
+    checkoutStore.updateSelectedSeats(seatId, isReserved, seat);
     // Update the seat's status locally if needed
   } catch (error) {
     console.error('Error toggling the seat:', error);
