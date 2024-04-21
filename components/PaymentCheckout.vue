@@ -106,15 +106,17 @@ const handleSubmit = async () => {
       token: token.id,
       customer,
       amount: CheckoutStore.ticketQuickTotal,
-      eventDetails: CheckoutStore.selectedSeats
+      eventDetails: { eventId: CheckoutStore.selectEventDetails?.value, seats: CheckoutStore.selectedSeats}
     }),
     });
 
     console.log('Payment successful:', response);
-    router.push('/success');
+    router.push('/tickets/success');
   } catch (error) {
     console.error('Payment error:', error);
-    router.push('/error');
+
+
+    router.push('/tickets/error');
   }
   loading.value = false;
 }
