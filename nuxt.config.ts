@@ -7,7 +7,7 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           hid: 'description',
-          name: 'description',
+          name: 'Ticket System',
           content: 'Reverence Studios Recital'
         }
       ],
@@ -31,16 +31,16 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/strapi', '@pinia/nuxt', 'nuxt-primevue', 'nuxt-socket-io'],
     strapi: {
-      url: process.env.STRAPI_URL || 'http://localhost:1337',
+      url: process.env.STRAPI_URL,
       prefix: '/api',
       admin: '/admin',
       version: 'v4',
-      // cookie: {
-      //   path: '/',
-      //   maxAge: 14 * 24 * 60 * 60,
-      //   secure: process.env.NODE_ENV === 'production',
-      //   sameSite: true
-      // },
+      cookie: {
+        path: '/',
+        maxAge: 14 * 24 * 60 * 60,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: true
+      },
       cookieName: 'strapi_jwt'
     },
     primevue: {
@@ -52,7 +52,7 @@ export default defineNuxtConfig({
   io: {
     sockets: [{
       name: 'main',
-      url: 'http://localhost:1337'
+      url: process.env.STRAPI_URL,
     }]
   },
   runtimeConfig: {

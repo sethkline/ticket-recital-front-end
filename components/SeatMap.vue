@@ -10,7 +10,6 @@
       </div>
     </div>
   </div>
-  <Toast></Toast>
 </template>
 
 <script setup lang="ts">
@@ -22,11 +21,6 @@ const toast = useToast();
 
 const SeatStore = useSeatStore();
 
-// Utility function to convert row index to a letter (0 -> A, 1 -> B, etc.)
-function getRowLetter(index: number) {
-  console.log(index)
-  return String.fromCharCode(65 + index); // ASCII value for 'A' is 65
-}
 
 // const client = useStrapiClient();
 // const socket = io('http://localhost:1337'); // Adjust this URL to the actual URL of your Strapi server

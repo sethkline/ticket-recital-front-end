@@ -3,8 +3,10 @@
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col">
       <div v-if="isLogin" class="mb-4">
         <h2 class="font-bold text-lg mb-2">Login</h2>
-        <InputText v-model="loginInfo.identifier" placeholder="Email" class="mb-3"/>
-        <InputText v-model="loginInfo.password" placeholder="Password" type="password" />
+        <div class="flex space-x-2">
+          <InputText v-model="loginInfo.identifier" placeholder="Email" class="mb-3"/>
+          <InputText v-model="loginInfo.password" placeholder="Password" class="mb-3" type="password" />
+        </div>
         <Button label="Login" @click="handleLogin" class="mt-4"/>
         <p class="mt-4">Don't have an account? <a href="#" @click="toggleView" class="text-blue-500">Register</a></p>
       </div>
@@ -20,6 +22,7 @@
         <p class="mt-4">Already have an account? <a href="#" @click="toggleView" class="text-blue-500">Login</a></p>
       </div>
     </div>
+    <Toast/>
   </div>
 </template>
 
@@ -27,6 +30,7 @@
 import { ref } from 'vue'
 const { login, register } = useStrapiAuth()
 const router = useRouter()
+const toast = useToast();
 
 
 const isLoggingIn = ref(false)
@@ -45,7 +49,7 @@ const handleLogin = async() => {
     router.push('/purchase-tickets')
   } catch (e) {
     console.warn(e)
-    // Update your UI with the error message
+    toast.add({severity: 'error', summary: 'Login Error', detail: 'Invalid email or password', life: 3000});
   } finally {
     isLoggingIn.value = false; // End loading
   }
@@ -58,7 +62,7 @@ const handleRegister = async() => {
     router.push('/purchase-tickets')
   } catch (e) {
     console.warn(e)
-    // Update your UI with the error message
+    toast.add({severity: 'error', summary: 'Register Error', detail: 'Registration failed', life: 3000});
   } finally {
     isLoggingIn.value = false; // End loading
   }
