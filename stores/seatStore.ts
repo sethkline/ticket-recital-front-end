@@ -1,61 +1,8 @@
-// import { defineStore } from 'pinia';
-// import { io } from 'socket.io-client';
-// import axios from 'axios';  // Assuming you use axios for HTTP requests
 
-// export const useSeatStore = defineStore('seatStore', {
-//   state: () => ({
-//     seats: [],
-//     socket: null,
-//   }),
-//   actions: {
-//     setSeats(seats) {
-//       this.seats = seats;
-//     },
-//     updateSeatStatus(seatId, isReserved) {
-//       const seat = this.seats.find(s => s.id === seatId);
-//       if (seat) {
-//         seat.attributes.is_reserved = isReserved;
-//       }
-//     },
-//     initializeSocket() {
-//       if (!this.socket) {
-//         this.socket = io('http://localhost:1337'); // Adjust the URL to your Strapi server
-//         this.socket.on('seat-reserved', (data) => {
-//           this.updateSeatStatus(data.seatId, data.isReserved);
-//         });
-//       }
-//     },
-//     disconnectSocket() {
-//       if (this.socket) {
-//         this.socket.disconnect();
-//         this.socket = null;
-//       }
-//     },
-//     async toggleSeat(endpoint) {
-//       try {
-//         const response = await axios.post(endpoint);
-//         console.log('API response for toggling seat:', response.data);
-//         // Optionally emit an event if the seat reservation changes something critical
-//         if (this.socket) {
-//           this.socket.emit('reserve-seat', {
-//             seatId: response.data.seatId,
-//             isReserved: response.data.isReserved
-//           });
-//         }
-//         return response;
-//       } catch (error) {
-//         console.error('Error toggling the seat:', error);
-//         throw error;
-//       }
-//     }
-//   }
-// });
-// stores/seatStore.js
 import { ref } from 'vue'
 import { defineStore } from 'pinia';
 import { useStrapi } from '#imports'
 import { useCheckoutStore } from '~/stores/checkoutStore';
-import axios from 'axios';  // Assuming you use axios for HTTP requests
 import type { SeatResponse } from '~/types/seat';
 import type { EventResponse } from '~/types/event'
 
@@ -65,6 +12,7 @@ export const useSeatStore = defineStore('seatStore', () => {
   const client = useStrapiClient()
   const seats: Ref<SeatResponse[]> = ref([]);
   const events: Ref<EventResponse[]> = ref([]);
+  const ticketPrice: Ref<number> = ref(18);
 
   async function fetchEvents() {
     try {
@@ -76,11 +24,10 @@ export const useSeatStore = defineStore('seatStore', () => {
   }
 
 // Define the fetchSeats function to handle fetching seats for multiple events with pagination.
-async function fetchSeats(eventIds: string[]): Promise<void> {
+async function fetchSeats(eventIds: string[], returnValues: boolean): Promise<void | SeatResponse[]> {
   try {
     const pageSize = 100; // Define the page size, adjust based on Strapi's limits or your requirements.
     let allSeats:SeatResponse[] = []; // Array to hold all fetched seats across all pages and events.
-
     // Iterate over each event ID provided.
     for (const eventId of eventIds) {
       let fetched = 0; // Counter for fetched items.
@@ -105,8 +52,10 @@ async function fetchSeats(eventIds: string[]): Promise<void> {
       }
     }
 
+    if(returnValues) { return allSeats }
     // Once all data is fetched, assign it to the reactive state.
     seats.value = allSeats;
+
   } catch (error) {
     console.error('Failed to fetch seats:', error);
   }
@@ -137,6 +86,32 @@ async function toggleSeat(seatId: string, isReserved: boolean): Promise<void> {
   }
 }
 
+const morningSeats: Ref<SeatResponse[]> = ref([])
+const afternoonSeats: Ref<SeatResponse[]> = ref([])
+
+async function fetchBothAvailableSeats(): Promise<boolean> {
+  console.log('fetching both seats', events.value)
+  morningSeats.value = []
+  afternoonSeats.value = []
+  
+  const morningId = events.value.find(event => event.attributes.title === 'Morning Recital')?.id
+  const afternoonId = events.value.find(event => event.attributes.title === 'Afternoon Recital')?.id
+
+  if (!morningId || !afternoonId) {
+    return false
+  }
+
+  try {
+     morningSeats.value = await fetchSeats([morningId as unknown as string], true)
+     afternoonSeats.value = await fetchSeats([afternoonId as unknown as string], true)
+
+    return true
+
+  } catch (error) {
+    console.error('Error fetching seats:', error);
+  }
+}
+
 
 
   return {
@@ -144,6 +119,10 @@ async function toggleSeat(seatId: string, isReserved: boolean): Promise<void> {
     events,
     fetchEvents,
     fetchSeats,
-    toggleSeat
+    toggleSeat,
+    ticketPrice,
+    morningSeats,
+    afternoonSeats,
+    fetchBothAvailableSeats
   }
 });

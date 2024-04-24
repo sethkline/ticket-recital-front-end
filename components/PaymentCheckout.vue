@@ -7,10 +7,6 @@
           <InputText id="name_field" v-model="customer.name" class="w-full lg:w-1/2" />
           <label for="name_field">Name</label>
         </FloatLabel>
-        <FloatLabel class="mb-6">
-          <InputText id="email_field" type="email" class="w-full lg:w-1/2" v-model="customer.email" />
-          <label for="email_field">Email</label>
-        </FloatLabel>
         <div class="mb-6">
           <div id="card-element"></div>
         </div>
@@ -46,7 +42,6 @@ const CheckoutStore = useCheckoutStore()
 let loading = ref(false);
 let customer = reactive({
   name: '',
-  email: '',
 });
 
 

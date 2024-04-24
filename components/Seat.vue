@@ -16,7 +16,7 @@
 import { ref, defineProps, defineEmits } from 'vue';
 import type { SeatResponse } from '~/types/seat';
 
-const props = defineProps<{ seat: SeatResponse }>();
+const props = defineProps<{ seat: SeatResponse, hasSelectedAll: boolean }>();
 
 // Include a callback in the emit function for the parent to potentially revert the selection
 const emit = defineEmits<{
@@ -26,6 +26,10 @@ const emit = defineEmits<{
 const isSelected = ref(false);
 
 function handleClick() {
+  if (!isSelected.value && props.hasSelectedAll) {
+    return
+  }
+  // Check if seat is available
   if (props.seat.attributes.is_available) {
     isSelected.value = !isSelected.value; // Toggle selection state
     // Emit the event and provide a callback to revert the isSelected state

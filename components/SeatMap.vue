@@ -1,25 +1,27 @@
 <template>
-  <div class="seatmap-container">
-    <div class="stage-label">Stage</div>
-    <div class="seatmap" v-if="Boolean(seats && seats.length)">
-      <div v-for="(section, index) in sections" :key="index" class="section" :class="getSectionClass(index)">
-        <div v-for="(rowSeats, row) in section" :key="row" class="row">
-          <span class="row-label">{{ row }}</span>
-          <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" @toggle-seat="handleSeatToggle" class="seat" />
+    <div class="seatmap-container">
+      <div class="stage-label">Stage</div>
+      <div class="seatmap" v-if="Boolean(seats && seats.length)">
+        <div v-for="(section, index) in sections" :key="index" class="section" :class="getSectionClass(index)">
+          <div v-for="(rowSeats, row) in section" :key="row" class="row">
+            <span class="row-label">{{ row }}</span>
+            <Seat v-for="seat in rowSeats" :key="seat.id" :seat="seat" :hasSelectedAll="hasSelectedAll" @toggle-seat="handleSeatToggle" class="seat" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
 import { useSeatStore } from '~/stores/seatStore'
+import { useCheckoutStore } from '~/stores/checkoutStore'
 import type { SeatResponse } from '~/types/seat';
 import { useToast } from 'primevue/usetoast';
 import SeatPicker from './SeatPicker.vue';
 const toast = useToast();
 
 const SeatStore = useSeatStore();
+const CheckoutStore = useCheckoutStore();
 
 
 // const client = useStrapiClient();
@@ -28,7 +30,14 @@ const SeatStore = useSeatStore();
 
 
 
-const props = defineProps<{ seats: SeatResponse[] }>();
+const props = defineProps<{ seats: SeatResponse[], numberOfSeats: number }>();
+
+const hasSelectedAll = computed(() => {
+  if (props.seats.length > 0) {
+   return CheckoutStore?.selectedSeats?.length === props.numberOfSeats
+  }
+  return false;
+});
 
 // onMounted(() => {
 //   SeatStore.initializeSocket()
@@ -172,6 +181,64 @@ const handleSeatToggle = async (seatId: string, isSelected: boolean, revertCallb
 }
 
 .seat {
-  margin: 0 5px;
+  margin: 0 2px;
 }
 </style>
+<!-- <style scoped>
+.stage-label {
+  width: 100%;
+  text-align: center;
+  padding: 1em 0;
+  font-size: 1.25em;
+  font-weight: bold;
+}
+
+.seatmap-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  overflow: hidden; /* Prevent overflow to ensure everything fits within this container */
+}
+
+.seatmap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Switch to auto-fit to collapse empty space */
+  justify-content: start; /* Align items to the start to see how items are fitting */
+  gap: 10px;
+  overflow-x: auto;
+  width: 100%;
+  min-width: 100%;
+}
+
+.section {
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section--right {
+  align-items: flex-start;
+}
+
+.section--left {
+  align-items: flex-end;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap; /* Prevent wrapping to keep all seats in one line */
+}
+
+.row-label {
+  margin-right: .5em;
+  font-weight: bold;
+}
+
+.seat {
+  margin: 0 2px;
+}
+</style> -->
