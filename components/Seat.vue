@@ -1,14 +1,15 @@
 <template>
-  <button 
-    class="px-3 py-1 text-xs seat" 
+  <button
+    class="px-3 py-1 text-xs seat"
     :class="{
       'bg-green-300 border-green-500 hover:bg-green-400': props.seat.attributes.is_available,
       'bg-red-300 border-red-500': !props.seat.attributes.is_available,
-      'ring-2 ring-blue-500': isSelected,
+      'ring-2 ring-blue-500': isSelected
     }"
-    @click="handleClick">
-    <!-- {{ props.seat.attributes.number }}
-    {{ props.seat.attributes.is_reserved }} -->
+    @click="handleClick"
+  >
+  <span class="text-sm" v-if="props.seat?.attributes?.handicap_access">♿</span>
+  <span v-if="showSeatNumber">{{ props.seat?.attributes?.number }}</span>
   </button>
 </template>
 
@@ -16,7 +17,7 @@
 import { ref, defineProps, defineEmits } from 'vue';
 import type { SeatResponse } from '~/types/seat';
 
-const props = defineProps<{ seat: SeatResponse, hasSelectedAll: boolean }>();
+const props = defineProps<{ seat: SeatResponse; hasSelectedAll: boolean; showHandicap: boolean; showSeatNumber: boolean }>();
 
 // Include a callback in the emit function for the parent to potentially revert the selection
 const emit = defineEmits<{
@@ -27,8 +28,14 @@ const isSelected = ref(false);
 
 function handleClick() {
   if (!isSelected.value && props.hasSelectedAll) {
+    return;
+  }
+
+  // don't let a handicap seat be selected
+  if(props.seat?.attributes?.handicap_access && !Boolean(props.showHandicap) ) {
     return
   }
+
   // Check if seat is available
   if (props.seat.attributes.is_available) {
     isSelected.value = !isSelected.value; // Toggle selection state

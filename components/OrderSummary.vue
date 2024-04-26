@@ -5,45 +5,47 @@
     </template>
 
     <template #content>
-
       <SeatPicker></SeatPicker>
-    <!-- <div class="p-field">
-      <label>Subtotal (Morning Show)</label>
-      <div>{{ checkoutStore.selectedEventDetailsDetails.morningShow.price }}</div>
-    </div>
+      <div class="pl-4">
+        <div v-if="hasDvd" class="font-bold">Selected DVD(s): {{ checkoutStore.selectedDvds }}</div>
+  
+        <div class="font-bold text-lg">Total: ${{ checkoutStore.orderTotal.toFixed(2) }}</div>
+  
+        <div class="font-bold py-2">
+          <span>*Includes Free Digital Download</span>
+          <span v-if="!hasDvd" class="ml-4">Want a physical copy too? Get the DVD for only $30!</span>
+        </div>
+  
+        <div v-if="hasDvd">
+          <Button @click="removeDVDFromCart">Remove DVD</Button>
+          <span class="ml-2">Quantity: {{ checkoutStore.selectedDvds }}</span>
+        </div>
+        
+        <Button v-else="!hasDvd" @click="addDVDToCart">Add DVD ($30)</Button>
 
-    <div class="p-field">
-      <label>Subtotal (Afternoon Show)</label>
-      <div>{{ checkoutStore.selectedEventDetailsDetails.afternoonShow.price }}</div>
-    </div>
+      </div>
 
-    <div class="p-field">
-      <label>Tax Estimate</label>
-      <div>{{ (checkoutStore.selectedEventDetailsDetails.morningShow.price + checkoutStore.selectedEventDetailsDetails.afternoonShow.price) * checkoutStore.selectedEventDetailsDetails.taxRate }}</div>
-    </div> -->
-
-    <div class="p-field">
-      <label>Free Digital Download Included</label>
-      <div>Yes</div>
-    </div>
-
-    <!-- <div class="p-field p-text-bold">
-      <label>Order Total</label>
-      <div>{{ checkoutStore.orderTotal }}</div>
-    </div> -->
-  </template>
-
-    <template #footer>
-    <div class="p-field">
-      <p>Tickets will be sent to your registered email and can also be accessed from your account.</p>
-    </div>
     </template>
   </Card>
 </template>
 
-
 <script setup lang="ts">
 import { useCheckoutStore } from '~/stores/checkoutStore';
 import SeatPicker from './SeatPicker.vue';
+
 const checkoutStore = useCheckoutStore();
+
+const hasDvd = computed(() => checkoutStore.selectedDvds > 0);
+
+const addDVDToCart = () => {
+  // Add DVD to cart logic (interact with checkoutStore)
+  checkoutStore.selectedDvds = checkoutStore.selectedDvds + 1; 
+};
+
+const removeDVDFromCart = () => {
+  // Remove DVD from cart logic (interact with checkoutStore)
+  if (checkoutStore.selectedDvds > 0) {
+    checkoutStore.selectedDvds = checkoutStore.selectedDvds - 1;
+  }
+};
 </script>

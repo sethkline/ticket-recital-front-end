@@ -13,7 +13,7 @@
       </Fieldset>
       <div class="py-6 w-full text-center">
         <Button type="submit" size="large" :disabled="loading">
-          {{ loading ? "Loading..." : `Pay $${CheckoutStore.ticketQuickTotal}` }}
+          {{ loading ? "Loading..." : `Pay $${CheckoutStore.orderTotal}` }}
         </Button>
       </div>
     </form>
@@ -56,7 +56,7 @@ onMounted(async() => {
     cardElement = elements.create('card',{
       style: {
     base: {
-      iconColor: '#c4f0ff',
+      iconColor: 'rgb(71 85 105)',
       color: '#000', 
       fontWeight: '500',
       fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
@@ -66,7 +66,7 @@ onMounted(async() => {
         color: '#fce883',
       },
       '::placeholder': {
-        color: '#87BBFD',
+        color: 'rgb(71 85 105)',
       },
     },
     invalid: {
@@ -94,13 +94,17 @@ const handleSubmit = async () => {
     return;
   }
 
+  // TODO update the shape of this response to have an id and then seats
+  // instead of having to hardcode the morningIds and afternoonIds
+
   try {
     const response = await client(`/orders/payment`, {
       method: 'POST',
       body: JSON.stringify({
       token: token.id,
       customer,
-      amount: CheckoutStore.ticketQuickTotal,
+      morningIds: CheckoutStore.selectedMorningIds,
+      amount: CheckoutStore.orderTotal,
       eventDetails: { eventId: CheckoutStore.selectEventDetails?.value, seats: CheckoutStore.selectedSeats}
     }),
     });

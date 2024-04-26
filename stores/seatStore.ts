@@ -13,6 +13,7 @@ export const useSeatStore = defineStore('seatStore', () => {
   const seats: Ref<SeatResponse[]> = ref([]);
   const events: Ref<EventResponse[]> = ref([]);
   const ticketPrice: Ref<number> = ref(18);
+  const selectedEvent: Ref<string | null> = ref(null);
 
   async function fetchEvents() {
     try {
@@ -43,7 +44,8 @@ async function fetchSeats(eventIds: string[], returnValues: boolean): Promise<vo
 
         // Check if we got data and handle it.
         if (response.data && response.data.length) {
-          allSeats.push(...response.data as SeatResponse[]);
+          const seatsWithEventId = response.data.map(seat => ({ ...seat, eventId })); // Add eventId to each seat
+          allSeats.push(...seatsWithEventId);
           fetched += response.data.length;
           currentPage++; // Move to the next page.
         } else {
@@ -54,7 +56,7 @@ async function fetchSeats(eventIds: string[], returnValues: boolean): Promise<vo
 
     if(returnValues) { return allSeats }
     // Once all data is fetched, assign it to the reactive state.
-    seats.value = allSeats;
+    seats.value = allSeats
 
   } catch (error) {
     console.error('Failed to fetch seats:', error);
@@ -86,24 +88,42 @@ async function toggleSeat(seatId: string, isReserved: boolean): Promise<void> {
   }
 }
 
-const morningSeats: Ref<SeatResponse[]> = ref([])
-const afternoonSeats: Ref<SeatResponse[]> = ref([])
+const getEventIdByTitle = (title: ('Morning Recital' | 'Afternoon Recital')) => {
+  if (!events.value) return
+
+  return events.value.find(event => event.attributes.title === title)?.id
+}
+
+const morningSeats = computed(() => {
+  if (!seats.value?.length) return []
+  return seats.value.filter(seat => seat?.eventId === getEventIdByTitle('Morning Recital'))
+})
+const afternoonSeats = computed(() => {
+  if (!seats.value?.length) return []
+  return seats.value.filter(seat => seat.eventId === getEventIdByTitle('Afternoon Recital'))
+})
+
 
 async function fetchBothAvailableSeats(): Promise<boolean> {
   console.log('fetching both seats', events.value)
-  morningSeats.value = []
-  afternoonSeats.value = []
   
-  const morningId = events.value.find(event => event.attributes.title === 'Morning Recital')?.id
-  const afternoonId = events.value.find(event => event.attributes.title === 'Afternoon Recital')?.id
+  const morningId = getEventIdByTitle('Morning Recital')
+  const afternoonId = getEventIdByTitle('Afternoon Recital')
+
+
 
   if (!morningId || !afternoonId) {
     return false
   }
 
   try {
-     morningSeats.value = await fetchSeats([morningId as unknown as string], true)
-     afternoonSeats.value = await fetchSeats([afternoonId as unknown as string], true)
+    const morningSeats = await fetchSeats([morningId as unknown as string], true)
+    const afternoonSeats = await fetchSeats([afternoonId as unknown as string], true)
+
+    if (morningSeats && afternoonSeats) {
+      seats.value = [...morningSeats, ...afternoonSeats]
+    }
+     
 
     return true
 
@@ -123,6 +143,7 @@ async function fetchBothAvailableSeats(): Promise<boolean> {
     ticketPrice,
     morningSeats,
     afternoonSeats,
-    fetchBothAvailableSeats
+    fetchBothAvailableSeats,
+    selectedEvent,
   }
 });
