@@ -1,5 +1,8 @@
 <template>
   <div class="seatmap-container">
+    <div v-if="isAdmin && adminSelected.length" class="flex">
+    <SplitButton label="Reserve Selected" icon="pi pi-plus" class="mr-2" :model="adminSelectItems" @click="handleAdminReserve"/> 
+    </div>
     <div class="stage-label">Stage</div>
     <div class="seatmap" v-if="Boolean(seats && seats.length)">
       <div v-for="(section, index) in sections" :key="index" class="section" :class="getSectionClass(index)">
@@ -9,10 +12,13 @@
             v-for="seat in rowSeats"
             :key="seat.id"
             :seat="seat"
+            :showSeatNumber="isAdmin"
+            :selectUnavailable="isAdmin"
             :hasSelectedAll="hasSelectedAll"
             :showHandicap="showHandicap"
             @toggle-seat="handleSeatToggle"
             class="seat"
+
           />
         </div>
       </div>
@@ -22,19 +28,52 @@
 
 <script setup lang="ts">
 import { useSeatStore } from '~/stores/seatStore';
-import { useCheckoutStore } from '~/stores/checkoutStore';
+import { useAdminStore } from '~/stores/adminStore';
 import type { SeatResponse } from '~/types/seat';
 import { useToast } from 'primevue/usetoast';
 import SeatPicker from './SeatPicker.vue';
 const toast = useToast();
 
 const SeatStore = useSeatStore();
-const CheckoutStore = useCheckoutStore();
+const AdminStore = useAdminStore();
 
 // const client = useStrapiClient();
 // const socket = io('http://localhost:1337'); // Adjust this URL to the actual URL of your Strapi server
 
-const props = defineProps<{ seats: SeatResponse[]; hasSelectedAll: boolean; showHandicap: boolean }>();
+const props = defineProps<{ seats: SeatResponse[]; hasSelectedAll: boolean; showHandicap: boolean; isAdmin: boolean }>();
+
+
+//admin selected seats functions
+const adminSelectItems = [
+    {
+        label: 'make handicap',
+        icon: 'pi pi-refresh',
+        command: () => {
+          handleHandicapAccess(true);
+        }
+    },
+    {
+        label: 'make available',
+        icon: 'pi pi-times',
+        command: () => {
+            handleAdminReserve(true);
+            toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000 });
+        }
+    }
+];
+
+const handleAdminReserve = async(isAvailable = false) => {
+  await AdminStore.updateSeatAvailability(adminSelected.value, isAvailable);
+  await SeatStore.fetchBothAvailableSeats();
+  toast.add({ severity: 'success', summary: 'Reserved', detail: isAvailable ? 'Seats Unreserved' : 'Seats Reserved', life: 3000 });
+}
+
+const handleHandicapAccess = async(handicap_access = true) => {
+  await AdminStore.updateHandicapAvailability(adminSelected.value, handicap_access);
+  await SeatStore.fetchBothAvailableSeats();
+  toast.add({ severity: 'success', summary: 'Reserved', detail: 'Seats Handicap updated', life: 3000 });
+
+ }
 
 
 // onMounted(() => {
@@ -119,7 +158,19 @@ const rightMainSection = computed(() => {
   return sortSeatsByDisplayOrder(rows);
 });
 
+const adminSelected = ref([])
+
 const handleSeatToggle = async (seatId: string, isSelected: boolean, revertCallback: () => void) => {
+  if (props.isAdmin) {
+    // If the seat is already selected, remove it from the adminSelected array
+    if (isSelected) {
+      adminSelected.value.push(seatId);
+    } else {
+      adminSelected.value = adminSelected.value.filter((id) => id !== seatId);
+    }
+    return
+  }
+
   try {
     await SeatStore.toggleSeat(seatId, isSelected);
   } catch (error) {

@@ -1,15 +1,15 @@
 <template>
   <div>
-
+    <AdminMenuBar />
   </div>
 </template>
 
 <script setup lang="ts">
+import AdminMenuBar from '~/components/AdminMenuBar.vue';
+
 definePageMeta({
-  middleware: ['authenticated'],
+  middleware: ['authenticated']
 });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

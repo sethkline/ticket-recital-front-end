@@ -10,7 +10,7 @@
         <div class="mt-6 space-y-6 font-display text-2xl tracking-wide text-blue-900">
           <p>Buy your Tickets for Reverence Studios 2024 Spring Recital</p>
         </div>
-        <Button @click="$router.push('/register')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
+        <Button @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
         <dl
           class="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 sm:mt-16 sm:gap-x-16 sm:gap-y-10 sm:text-center lg:auto-cols-auto lg:grid-flow-col lg:grid-cols-none lg:justify-start lg:text-left"
         >
@@ -34,6 +34,9 @@ const items = [
 const props =defineProps<{ coverImageUrl: string}>()
 
 const backgroundImageStyle = computed(() => {
+  if (!props.coverImageUrl) {
+    return '';
+  }
   return `background-image: url('${props.coverImageUrl}');`;
 })
 </script>

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <AdminMenuBar />
     <h1 class="text-4xl font-bold">Shows</h1>
     <div class="flex space-x-2"><Button>Add New Show</Button>
     <Button @click="seedSeats" :disabled="isSeedingSeats" :loading="isSeedingSeats">{{ isSeedingSeats ? 'Seeding...' : 'Seed Seats' }}</Button>

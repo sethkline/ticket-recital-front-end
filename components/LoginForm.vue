@@ -4,7 +4,7 @@
       <h2 class="font-bold text-lg mb-2">Login</h2>
       <div class="flex space-x-2">
         <InputText v-model="loginInfo.identifier" placeholder="Email *" class="mb-3"/>
-        <InputText v-model="loginInfo.password" placeholder="Password *" class="mb-3" type="password" />
+        <Password v-model="loginInfo.password" toggle-mask  placeholder="Password *" class="mb-3" />
       </div>
       <Button label="Login" @click="handleLogin" class="mt-4"/>
     </div>

@@ -125,13 +125,34 @@
   <div>
     <ProgressSpinner v-if="isLoadingSeats" />
   </div>
+  <Dialog v-model:visible="passwordModal"  modal header="Early Bird Registration" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+    <template #container="{ closeCallback }">
+        <div class="flex flex-col px-10 py-7 gap-5 bg-slate-50">
+  
+            <h1 class="text-3xl font-bold text-primary">Early Bird Registration</h1>
+            <p text-primary-50>Please choose what type of early access and enter your passcode to buy tickets</p>
+            <div class="flex inline-flex w-full">
+    
+                  <SelectButton v-model="earlyAccessType" :options="earlyAccessOptions" optionLabel="name" class="w-full md:w-[14rem]" />
+              <div class="inline-flex flex-col gap-2">
+                  <label for="password" class="text-black font-semibold">Passcode</label>
+                  <Password id="password" v-model="accessPasscode" :feedback="false" toggleMask class="w-full md:w-[14rem]"></Password>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <Button label="Cancel" @click="$router.push('/')" text class="p-4 w-full "></Button>
+              <Button label="Submit" @click="handleEarlyAccess" icon="pi pi-check"  class="p-4 w-full border"></Button>
+            </div>
+        </div>
+    </template>
+    <p>
+    </p>
+</Dialog>
 </template>
 
 <script setup lang="ts">
 import { useSeatStore } from '~/stores/seatStore';
-import type { SeatResponse } from '~/types/seat';
 import { useCheckoutStore } from '~/stores/checkoutStore';
-import SeatPicker from './SeatPicker.vue';
 import StepperPanel from 'primevue/stepperpanel';
 
 // const { events, fetchEvents, fetchSeats, seats } = useSeatStore();
@@ -147,12 +168,17 @@ const numberOfEveningSeats = ref(0);
 const needsEveningHandicap = ref(false);
 const needsMorningHandicap = ref(false);
 
-const selectedEvent = ref(null);
 const ticketOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-// const seatsTest = computed(() => {
-//   return seats
-// })
+const passwordModal = ref(true)
+const accessPasscode = ref('')
+const earlyAccessType = ref('')
+
+const earlyAccessOptions = ref([
+  { name: 'Graduating Senior', value: 'senior' },
+  { name: 'Volunteer', value: 'volunteer' },
+])
+
 
 const eventOptions = computed(() => {
   if (!SeatStore.events) return [];
@@ -164,13 +190,6 @@ const eventOptions = computed(() => {
   return [...availableOptions, { name: 'Both Recitals', value: null }];
 });
 
-// const availableSeats = computed(() => {
-//   if (selectedEvent.value) {
-//     console.log(selectedEvent.value)
-//     return seats.filter(seat => seat.attributes.eventId === selectedEvent.value[0].value);
-//   }
-//   return [];
-// });
 
 const handleSelectBothSeats = async (goToNextStep: () => void) => {
   isLoadingSeats.value = true;
@@ -179,41 +198,20 @@ const handleSelectBothSeats = async (goToNextStep: () => void) => {
   goToNextStep();
 };
 
+const isLoadingPasswordModal = ref(false)
+const handleEarlyAccess = async () => {
+  const payload = {passcode: accessPasscode.value, earlyAccessType: earlyAccessType.value.value}
+  isLoadingPasswordModal.value = true
+  passwordModal.value = true
+  const response = await SeatStore.submitEarlyAccessPasscode(payload);
+  if (response) {
+    passwordModal.value = false
+    isLoadingPasswordModal.value = false
+  };
+};
+
 const isLoadingSeats = ref(false);
 
-// watch(selectedEvent, async(newVal) => {
-//   if (newVal) {
-//     isLoadingSeats.value = true
-//     CheckoutStore.selectEventDetails = selectedEvent.value
-//     // todo fix this watcher to work with two ids
-//     await SeatStore.fetchSeats([selectedEvent.value.value]);
-//     isLoadingSeats.value = false
-//   }
-// });
-// Watcher for both recitals and selected event
-// watch([selectedEvent, bothRecitals], async ([newSelectedEvent, newBothRecitals]) => {
-//   isLoadingSeats.value = true;
-//   let eventIds = [];
-
-//   if (newBothRecitals) {
-//     // If buying tickets for both recitals, include all event IDs
-//     eventIds = SeatStore.events.map(event => event.id);
-//   } else if (newSelectedEvent) {
-//     // Only one event selected
-//     eventIds.push(newSelectedEvent.value);
-//   }
-
-//   if (eventIds.length > 0) {
-//     CheckoutStore.selectEventDetails = eventIds.map(id => ({ id }));
-//     await SeatStore.fetchSeats(eventIds);
-//   }
-
-//   isLoadingSeats.value = false;
-// }, { immediate: true });
-
-// const handleSelectedSeats = (selectedSeats) => {
-//   CheckoutStore.selectedSeats = selectedSeats;
-// };
 </script>
 
 <style scoped></style>

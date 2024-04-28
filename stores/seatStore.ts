@@ -10,15 +10,71 @@ export const useSeatStore = defineStore('seatStore', () => {
   const checkoutStore = useCheckoutStore();
   const { find } = useStrapi();
   const client = useStrapiClient()
+  const recital: Ref<EventResponse | null> = ref(true);
   const seats: Ref<SeatResponse[]> = ref([]);
   const events: Ref<EventResponse[]> = ref([]);
   const ticketPrice: Ref<number> = ref(18);
   const selectedEvent: Ref<string | null> = ref(null);
+  const canAccessEarly = ref(false)
+
+  const showPasscodeModal = (event: EventResponse) => {
+    console.log(event, 'showPasscodeModal');
+    showEarlyAccessRestriction.value=true
+  }
+
+  const showEarlyAccessRestriction = ref(false)
+
+  async function submitEarlyAccessPasscode({passcode, earlyAccessType}: {passcode: string,  earlyAccessType: string,  }): Promise<boolean> {
+    try {
+      const payload = { type: earlyAccessType, passphrase: passcode }
+      const response = await client(`/early-access-phrases/verify`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      console.log('API response for submitting early access passcode:', response);
+      if (response && response.accessGranted) {
+        canAccessEarly.value = true
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Error submitting early access passcode:', error);
+      throw error
+    }
+  }
+
+  // const fetchRecital = async() => {
+  //   try {
+  //     const response = await find('recitals');
+  //     console.log(response, 'response')
+  //     if (response && response.data) {
+  //       // find the recital that is active
+  //       recital.value = response.data.find((recital: EventResponse) => recital.attributes.canSellTickets);
+  //     }
+  //     return response
+  //     // recital.value = eventResponse.data as EventResponse[];
+  //   } catch (error) {
+  //     console.error('Failed to fetch recital:', error);
+  //   }
+  // }
 
   async function fetchEvents() {
     try {
       const eventResponse = await find('events');
+      const now = new Date();
       events.value = eventResponse.data as EventResponse[];
+
+          // Iterate through events to check for any access restrictions
+    events.value.forEach(event => {
+      if (event.is_pre_sale_active && now >= new Date(event.pre_sale_start) && now <= new Date(event.pre_sale_end)) {
+        // If pre-sale is active and we are within the pre-sale period
+        // Show passcode modal for this event
+        showPasscodeModal(event);
+      } else if (now < new Date(event.ticket_sale_start) || now > new Date(event.ticket_sale_end)) {
+        // If it's outside the ticket selling period
+        event.accessRestricted = true; // Add a flag to indicate restricted access
+      }
+    });
     } catch (error) {
       console.error('Failed to fetch events:', error);
     }
@@ -145,5 +201,7 @@ async function fetchBothAvailableSeats(): Promise<boolean> {
     afternoonSeats,
     fetchBothAvailableSeats,
     selectedEvent,
+    submitEarlyAccessPasscode,
+    recital,
   }
 });

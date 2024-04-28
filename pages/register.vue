@@ -5,7 +5,7 @@
         <h2 class="font-bold text-lg mb-2">Login</h2>
         <div class="flex flex-col sm:flex-row space-x-0 sm:space-x-2">
           <InputText v-model="loginInfo.identifier" placeholder="Email *" class="mb-3 flex-1" />
-          <InputText v-model="loginInfo.password" placeholder="Password *" class="mb-3 flex-1" type="password" />
+          <Password v-model="loginInfo.password" :feedback="false" placeholder="Password *" toggle-mask class="mb-3 flex-1" />
         </div>
         <Button label="Login" @click="handleLogin" class="mt-4 w-full sm:w-auto" />
         <p class="mt-4 text-center sm:text-left">
@@ -49,7 +49,7 @@ const router = useRouter();
 const toast = useToast();
 
 const isLoggingIn = ref(false);
-const isLogin = ref(true);
+const isLogin = ref(false);
 const loginInfo = ref({ identifier: '', password: '' });
 const registerInfo = ref({ email: '', password: '', confirmPassword: '', firstName: '', lastName: '' });
 

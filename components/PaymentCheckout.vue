@@ -29,6 +29,8 @@ import { useRouter } from 'vue-router';
 import { useRuntimeConfig } from '#imports';
 import { useCheckoutStore } from '#imports';
 
+const toast = useToast();
+
 const router = useRouter();
 const config = useRuntimeConfig();
 let stripePromise = loadStripe(config.public.STRIPE_PUBLIC_KEY);
@@ -97,15 +99,23 @@ const handleSubmit = async () => {
   // TODO update the shape of this response to have an id and then seats
   // instead of having to hardcode the morningIds and afternoonIds
 
+  const seats = [{
+    eventId: CheckoutStore.morningId, seats: CheckoutStore.selectedMorningSeats.map((seat) => seat.id),
+  },{
+    eventId: CheckoutStore.afternoonId,seats: CheckoutStore.selectedAfternoonSeats.map((seat) => seat.id),
+    }]
+
+
   try {
     const response = await client(`/orders/payment`, {
       method: 'POST',
       body: JSON.stringify({
       token: token.id,
       customer,
-      morningIds: CheckoutStore.selectedMorningIds,
+      seats,
+      dvds: CheckoutStore.selectedDvds,
       amount: CheckoutStore.orderTotal,
-      eventDetails: { eventId: CheckoutStore.selectEventDetails?.value, seats: CheckoutStore.selectedSeats}
+      eventDetails: { eventId: CheckoutStore.selectEventDetails?.value}
     }),
     });
 
@@ -113,9 +123,11 @@ const handleSubmit = async () => {
     router.push('/tickets/success');
   } catch (error) {
     console.error('Payment error:', error);
+    toast.add({ severity: 'error', summary: 'Payment Error', detail: 'Payment failed', life: 3000 });
 
 
-    router.push('/tickets/error');
+
+    // router.push('/tickets/error');
   }
   loading.value = false;
 }
