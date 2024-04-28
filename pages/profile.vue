@@ -6,8 +6,10 @@
       <ShowUsersTickets />
     </Fieldset>
     <!-- <UserTickets :tickets="tickets" /> -->
-    <EventCountdown :event="nextEvent" />
-    <Fieldset legend="Directions" :toggleable="true">
+    <div class="flex justify-center">
+      <EventCountdown :event="nextEvent" />
+    </div>
+    <!-- <Fieldset legend="Directions" :toggleable="true">
       <p class="m-0">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
         magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -15,18 +17,18 @@
         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
         laborum.
       </p>
-    </Fieldset>
-    <DirectionsMap :location="eventLocation" />
-    <Fieldset legend="Auditorium Map" :toggleable="true">
-      <p class="m-0">
+    </Fieldset> -->
+    <!-- <DirectionsMap :location="eventLocation" /> -->
+    <!-- <Fieldset legend="Auditorium Map" :toggleable="true"> -->
+      <!-- <p class="m-0">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
         magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
         consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
         laborum.
-      </p>
+      </p> -->
     <!-- <AuditoriumMap :seats="userSeats" /> -->
-    </Fieldset>
+    <!-- </Fieldset> -->
     <div class="w-full text-center">
       <Button class="size=large" link>
         <NuxtLink to="/purchase-tickets">

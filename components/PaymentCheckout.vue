@@ -2,11 +2,6 @@
   <div class="w-full">
     <form @submit.prevent="handleSubmit">
       <Fieldset :disabled="loading" legend="Payment" class="space-y-4">
-        <!-- Using FloatLabel for all fields -->
-        <FloatLabel class="mb-6">
-          <InputText id="name_field" v-model="customer.name" class="w-full lg:w-1/2" />
-          <label for="name_field">Name</label>
-        </FloatLabel>
         <div class="mb-6">
           <div id="card-element"></div>
         </div>
@@ -42,9 +37,6 @@ const client = useStrapiClient()
 const CheckoutStore = useCheckoutStore()
 
 let loading = ref(false);
-let customer = reactive({
-  name: '',
-});
 
 
 onMounted(async() => {
@@ -111,7 +103,6 @@ const handleSubmit = async () => {
       method: 'POST',
       body: JSON.stringify({
       token: token.id,
-      customer,
       seats,
       dvds: CheckoutStore.selectedDvds,
       amount: CheckoutStore.orderTotal,

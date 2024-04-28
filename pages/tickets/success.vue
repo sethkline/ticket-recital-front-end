@@ -7,10 +7,15 @@
     </div>
 
     <ShowUsersTickets/>
-    <div class="w-full text-center">
+    <div class="w-full text-center justify-center flex gap 2">
       <Button class="size=large" link>
+        <NuxtLink to="/purchase-tickets">
+          Buy More Tickets
+        </NuxtLink>
+      </Button>
+      <Button class="size=large">
         <NuxtLink to="/profile">
-          Go to My Profile
+          Go to My profile
         </NuxtLink>
       </Button>
     </div>
