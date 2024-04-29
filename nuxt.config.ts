@@ -31,7 +31,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/strapi', '@pinia/nuxt', 'nuxt-primevue', 'nuxt-socket-io'],
     strapi: {
-      url: process.env.STRAPI_URL || 'https:recital.reverence.dance/api',
+      url: 'https://recital.reverence.dance',
       prefix: '/api',
       admin: '/admin',
       version: 'v4',
