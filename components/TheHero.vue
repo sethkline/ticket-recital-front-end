@@ -10,7 +10,9 @@
         <div class="mt-6 space-y-6 font-display text-2xl tracking-wide text-blue-900">
           <p>Buy your Tickets for Reverence Studios 2024 Spring Recital</p>
         </div>
-        <Button @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
+        {{ recitalStore.ticketSalesTime }}
+        <Button v-if="recitalStore.ticketSalesTime" @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
+        <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" />
         <dl
           class="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 sm:mt-16 sm:gap-x-16 sm:gap-y-10 sm:text-center lg:auto-cols-auto lg:grid-flow-col lg:grid-cols-none lg:justify-start lg:text-left"
         >
@@ -31,6 +33,9 @@ const items = [
   { name: 'Venue', value: 'Mechanicsburg Middle School' },
   { name: 'Location', value: 'Mechanicsburg' }
 ];
+
+const recitalStore = useRecitalStore();
+const { recital } = storeToRefs(recitalStore);
 const props =defineProps<{ coverImageUrl: string}>()
 
 const backgroundImageStyle = computed(() => {

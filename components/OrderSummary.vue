@@ -8,6 +8,7 @@
       <SeatPicker></SeatPicker>
       <div class="pl-4">
         <div v-if="hasDvd" class="font-bold">Selected DVD(s): {{ checkoutStore.selectedDvds }}</div>
+        <div class="font-bold">Surcharge: $5</div>
   
         <div class="font-bold text-lg">Total: ${{ checkoutStore.orderTotal.toFixed(2) }}</div>
   

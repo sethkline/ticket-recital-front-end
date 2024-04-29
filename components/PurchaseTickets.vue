@@ -32,20 +32,27 @@
         <template #content="{ prevCallback, nextCallback }">
           <div
             v-if="
-              CheckoutStore?.selectedEvent?.name === 'Morning Recital' || CheckoutStore?.selectedEvent?.name === 'Both Recitals'
+              CheckoutStore?.selectedEvent?.name === 'Morning Recital' ||
+              CheckoutStore?.selectedEvent?.name === 'Both Recitals'
             "
           >
             <h2 class="mb-2 text-3xl font-bold">Select Morning Recital Seats</h2>
             <div class="flex flex-wrap gap-3 p-fluid mb-4">
               <div class="flex-auto">
                 <label for="numberOfMorningSeats" class="font-bold block mb-2">Number of Seats</label>
-                <Dropdown
-                  id="numberOfMorningSeats"
-                  v-model="numberOfMorningSeats"
-                  :options="ticketOptions"
-                  :showClear="numberOfMorningSeats > 0"
-                  class="w-full md:w-[14rem]"
-                />
+                <div class="flex">
+                  <InputNumber
+                    v-model="numberOfMorningSeats"
+                    class="font-bold w-full md:w-[14rem]"
+                    showButtons
+                    buttonLayout="vertical"
+                    style="width: 4rem"
+                    decrementButtonClassName="p-button-secondary"
+                    incrementButtonClassName="p-button-secondary"
+                    incrementButtonIcon="pi pi-plus"
+                    decrementButtonIcon="pi pi-minus"
+                  />
+                </div>
               </div>
               <div class="flex-auto">
                 <Checkbox v-model="needsMorningHandicap" input-id="needsMorningHandicap" binary></Checkbox>
@@ -70,13 +77,17 @@
             <div class="flex flex-wrap gap-3 p-fluid mb-4">
               <div class="flex-auto">
                 <label for="numberOfEveningSeats" class="font-bold block mb-2">Number of Seats</label>
-                <Dropdown
-                  id="numberOfEveningSeats"
-                  v-model="numberOfEveningSeats"
-                  :options="ticketOptions"
-                  :showClear="numberOfEveningSeats > 0"
-                  class="w-full md:w-[14rem]"
-                />
+                <InputNumber
+                    v-model="numberOfEveningSeats"
+                    class="font-bold w-full md:w-[14rem]"
+                    showButtons
+                    buttonLayout="vertical"
+                    style="width: 4rem"
+                    decrementButtonClassName="p-button-secondary"
+                    incrementButtonClassName="p-button-secondary"
+                    incrementButtonIcon="pi pi-plus"
+                    decrementButtonIcon="pi pi-minus"
+                  />
               </div>
               <div class="flex-auto">
                 <Checkbox v-model="needsEveningHandicap" input-id="needsEveningHandicap" binary></Checkbox>
@@ -95,7 +106,13 @@
 
           <div class="flex pt-4 justify-evenly">
             <Button label="Back" icon="pi pi-arrow-left" iconPos="left" @click="prevCallback" />
-            <Button v-if="CheckoutStore.selectedSeats.length > 0" label="Next" icon="pi pi-arrow-right" iconPos="right" @click="nextCallback" />
+            <Button
+              v-if="CheckoutStore.selectedSeats.length > 0"
+              label="Next"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              @click="nextCallback"
+            />
           </div>
         </template>
       </StepperPanel>
@@ -125,29 +142,43 @@
   <div>
     <ProgressSpinner v-if="isLoadingSeats" />
   </div>
-  <Dialog v-model:visible="passwordModal"  modal header="Early Bird Registration" :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
+  <Dialog
+    v-model:visible="passwordModal"
+    modal
+    header="Early Bird Registration"
+    :style="{ width: '50rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+  >
     <template #container="{ closeCallback }">
-        <div class="flex flex-col px-10 py-7 gap-5 bg-slate-50">
-  
-            <h1 class="text-3xl font-bold text-primary">Early Bird Registration</h1>
-            <p text-primary-50>Please choose what type of early access and enter your passcode to buy tickets</p>
-            <div class="flex inline-flex w-full">
-    
-                  <SelectButton v-model="earlyAccessType" :options="earlyAccessOptions" optionLabel="name" class="w-full md:w-[14rem]" />
-              <div class="inline-flex flex-col gap-2">
-                  <label for="password" class="text-black font-semibold">Passcode</label>
-                  <Password id="password" v-model="accessPasscode" :feedback="false" toggleMask class="w-full md:w-[14rem]"></Password>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <Button label="Cancel" @click="$router.push('/')" text class="p-4 w-full "></Button>
-              <Button label="Submit" @click="handleEarlyAccess" icon="pi pi-check"  class="p-4 w-full border"></Button>
-            </div>
+      <div class="flex flex-col px-10 py-7 gap-5 bg-slate-50">
+        <h1 class="text-3xl font-bold text-primary">Early Bird Registration</h1>
+        <p text-primary-50>Please choose what type of early access and enter your passcode to buy tickets</p>
+        <div class="flex inline-flex w-full">
+          <SelectButton
+            v-model="earlyAccessType"
+            :options="earlyAccessOptions"
+            optionLabel="name"
+            class="w-full md:w-[14rem]"
+          />
+          <div class="inline-flex flex-col gap-2">
+            <label for="password" class="text-black font-semibold">Passcode</label>
+            <Password
+              id="password"
+              v-model="accessPasscode"
+              :feedback="false"
+              toggleMask
+              class="w-full md:w-[14rem]"
+            ></Password>
+          </div>
         </div>
+        <div class="flex items-center gap-2">
+          <Button label="Cancel" @click="$router.push('/')" text class="p-4 w-full"></Button>
+          <Button label="Submit" @click="handleEarlyAccess" icon="pi pi-check" class="p-4 w-full border"></Button>
+        </div>
+      </div>
     </template>
-    <p>
-    </p>
-</Dialog>
+    <p></p>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -168,17 +199,16 @@ const numberOfEveningSeats = ref(0);
 const needsEveningHandicap = ref(false);
 const needsMorningHandicap = ref(false);
 
-const ticketOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+// const ticketOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-const passwordModal = ref(true)
-const accessPasscode = ref('')
-const earlyAccessType = ref('')
+const passwordModal = ref(true);
+const accessPasscode = ref('');
+const earlyAccessType = ref('');
 
 const earlyAccessOptions = ref([
   { name: 'Graduating Senior', value: 'senior' },
-  { name: 'Volunteer', value: 'volunteer' },
-])
-
+  { name: 'Volunteer', value: 'volunteer' }
+]);
 
 const eventOptions = computed(() => {
   if (!SeatStore.events) return [];
@@ -190,7 +220,6 @@ const eventOptions = computed(() => {
   return [...availableOptions, { name: 'Both Recitals', value: null }];
 });
 
-
 const handleSelectBothSeats = async (goToNextStep: () => void) => {
   isLoadingSeats.value = true;
   await SeatStore.fetchBothAvailableSeats();
@@ -198,20 +227,19 @@ const handleSelectBothSeats = async (goToNextStep: () => void) => {
   goToNextStep();
 };
 
-const isLoadingPasswordModal = ref(false)
+const isLoadingPasswordModal = ref(false);
 const handleEarlyAccess = async () => {
-  const payload = {passcode: accessPasscode.value, earlyAccessType: earlyAccessType.value.value}
-  isLoadingPasswordModal.value = true
-  passwordModal.value = true
+  const payload = { passcode: accessPasscode.value, earlyAccessType: earlyAccessType.value.value };
+  isLoadingPasswordModal.value = true;
+  passwordModal.value = true;
   const response = await SeatStore.submitEarlyAccessPasscode(payload);
   if (response) {
-    passwordModal.value = false
-    isLoadingPasswordModal.value = false
-  };
+    passwordModal.value = false;
+    isLoadingPasswordModal.value = false;
+  }
 };
 
 const isLoadingSeats = ref(false);
-
 </script>
 
 <style scoped></style>

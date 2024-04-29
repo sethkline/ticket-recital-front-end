@@ -188,6 +188,11 @@ async function fetchBothAvailableSeats(): Promise<boolean> {
   }
 }
 
+const clearSeatStore = () => {
+  seats.value = []
+  events.value = []
+  selectedEvent.value = null
+}
 
 
   return {
@@ -203,5 +208,6 @@ async function fetchBothAvailableSeats(): Promise<boolean> {
     selectedEvent,
     submitEarlyAccessPasscode,
     recital,
+    clearSeatStore
   }
 });

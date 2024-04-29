@@ -8,14 +8,12 @@
       </Fieldset>
       <div class="py-6 w-full text-center">
         <Button type="submit" size="large" :disabled="loading">
-          {{ loading ? "Loading..." : `Pay $${CheckoutStore.orderTotal}` }}
+          {{ loading ? 'Loading...' : `Pay $${CheckoutStore.orderTotal}` }}
         </Button>
       </div>
     </form>
   </div>
 </template>
-
-
 
 <script setup lang="ts">
 import { onMounted, ref, reactive } from 'vue';
@@ -33,42 +31,41 @@ let stripePromise = loadStripe(config.public.STRIPE_PUBLIC_KEY);
 // let elements = stripe.elements();
 let stripe, elements, cardElement;
 
-const client = useStrapiClient()
-const CheckoutStore = useCheckoutStore()
+const client = useStrapiClient();
+const CheckoutStore = useCheckoutStore();
 
 let loading = ref(false);
 
-
-onMounted(async() => {
+onMounted(async () => {
   stripe = await stripePromise;
   if (!stripe) {
     console.error('Stripe failed to initialize');
   }
   if (stripe) {
     elements = stripe.elements();
-    
-    cardElement = elements.create('card',{
+
+    cardElement = elements.create('card', {
       style: {
-    base: {
-      iconColor: 'rgb(71 85 105)',
-      color: '#000', 
-      fontWeight: '500',
-      fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
-      fontSize: '16px',
-      fontSmoothing: 'antialiased',
-      ':-webkit-autofill': {
-        color: '#fce883',
-      },
-      '::placeholder': {
-        color: 'rgb(71 85 105)',
-      },
-    },
-    invalid: {
-      iconColor: '#DC143C',
-      color: '#DC143C',
-    },
-  },
-});
+        base: {
+          iconColor: 'rgb(71 85 105)',
+          color: '#000',
+          fontWeight: '500',
+          fontFamily: 'Roboto, Open Sans, Segoe UI, sans-serif',
+          fontSize: '16px',
+          fontSmoothing: 'antialiased',
+          ':-webkit-autofill': {
+            color: '#fce883'
+          },
+          '::placeholder': {
+            color: 'rgb(71 85 105)'
+          }
+        },
+        invalid: {
+          iconColor: '#DC143C',
+          color: '#DC143C'
+        }
+      }
+    });
     cardElement.mount('#card-element');
   } else {
     console.error('Stripe elements not available');
@@ -81,47 +78,96 @@ const handleSubmit = async () => {
 
   // Create a token or handle the payment
   const { token, error } = await stripe!.createToken(cardElement);
-  
+
   if (error) {
     console.error('Payment error:', error);
     loading.value = false;
     return;
   }
 
-  // TODO update the shape of this response to have an id and then seats
-  // instead of having to hardcode the morningIds and afternoonIds
+  const seats = [
+    {
+      eventId: CheckoutStore.morningId,
+      seats: CheckoutStore.selectedMorningSeats.map((seat) => seat.id)
+    },
+    {
+      eventId: CheckoutStore.afternoonId,
+      seats: CheckoutStore.selectedAfternoonSeats.map((seat) => seat.id)
+    }
+  ];
 
-  const seats = [{
-    eventId: CheckoutStore.morningId, seats: CheckoutStore.selectedMorningSeats.map((seat) => seat.id),
-  },{
-    eventId: CheckoutStore.afternoonId,seats: CheckoutStore.selectedAfternoonSeats.map((seat) => seat.id),
-    }]
+  console.log(CheckoutStore.selectedMorningSeats);
+  const morningTicketInfo = CheckoutStore.selectedMorningSeats.map((seat) => {
+    return {
+      date: 'March 18th, 2024',
+      time: '10:30 AM',
+      row: seat?.attributes?.row ?? null,
+      seat: seat?.attributes?.number ?? null,
+      backgroundImage: 'morning'
+    };
+  });
 
+  const afternoonTicketInfo = CheckoutStore.selectedAfternoonSeats.map((seat) => {
+    return {
+      date: 'March 18th, 2024',
+      time: '12:30 PM',
+      row: seat?.attributes?.row ?? null,
+      seat: seat?.attributes?.number ?? null,
+      backgroundImage: 'afternoon'
+    };
+  });
+
+  // get rid of any empty seats
+  const printInfo = [...morningTicketInfo, ...afternoonTicketInfo].filter((ticket) => ticket?.row && ticket?.seat);
 
   try {
     const response = await client(`/orders/payment`, {
       method: 'POST',
       body: JSON.stringify({
-      token: token.id,
-      seats,
-      dvds: CheckoutStore.selectedDvds,
-      amount: CheckoutStore.orderTotal,
-      eventDetails: { eventId: CheckoutStore.selectEventDetails?.value}
-    }),
+        token: token.id,
+        seats,
+        dvds: CheckoutStore.selectedDvds,
+        amount: CheckoutStore.orderTotal,
+        printInfo
+      })
     });
 
     console.log('Payment successful:', response);
+
+    // get back pdfs of the tickets
+    // show them to print out
+    if (response?.tickets) {
+      // Convert the numeric byte array into a Blob of type 'application/pdf'
+      const blob = new Blob([new Uint8Array(response.tickets.data)], { type: 'application/pdf' });
+
+      // Create a URL for the blob
+      const url = window.URL.createObjectURL(blob);
+
+      // Optionally open the PDF in a new window or tab
+      window.open(url, '_blank');
+
+      // Or, create a link for the user to download the PDF
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = 'downloadedTicket.pdf'; // Specify the filename to download
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      // Cleanup the URL object
+      window.URL.revokeObjectURL(url);
+    }
+
+    CheckoutStore.clearEverything();
     router.push('/tickets/success');
   } catch (error) {
     console.error('Payment error:', error);
     toast.add({ severity: 'error', summary: 'Payment Error', detail: 'Payment failed', life: 3000 });
 
-
-
     // router.push('/tickets/error');
   }
   loading.value = false;
-}
+};
 </script>
 <style scoped>
 #card-element {

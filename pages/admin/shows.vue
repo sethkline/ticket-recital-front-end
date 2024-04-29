@@ -6,6 +6,11 @@
     <Button @click="seedSeats" :disabled="isSeedingSeats" :loading="isSeedingSeats">{{ isSeedingSeats ? 'Seeding...' : 'Seed Seats' }}</Button>
     </div>
 
+    <div>
+      <h2>Test Email Ticket</h2>
+      <Button @click="sendTestEmail">Test</Button>
+    </div>
+
     <SelectButton v-model="selectedEvent" :options="eventOptions" optionLabel="name" />
     <hr>
     <div>
@@ -28,6 +33,18 @@ definePageMeta({
 });
 
 const isSeedingSeats = ref(false)
+
+const sendTestEmail = async () => {
+  try {
+    await client('/orders/test-pdf', {
+      method: 'POST',
+      body: JSON.stringify({htmlContent: '<h1>Your PDF Content</h1>', userEmail: 'seth.mkline@gmail.com'}),
+    })
+    toast.add({severity: 'success', summary: 'Test email sent', detail: 'Successfully sent test email', life: 3000});
+  } catch (error) {
+    console.error('Error sending test email:', error)
+  }
+}
 
 const seedSeats = async () => {
   isSeedingSeats.value = true

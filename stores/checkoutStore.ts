@@ -22,6 +22,7 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
 
   const TICKET_PRICE = 18;
   const DVD_PRICE = 30;
+  const SURCHARGE = 5
 
   // const selectedEventDetailsDetails = ref({
   //   morningShow: { price: 50, quantity: 1 },
@@ -40,7 +41,7 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
 
 
   const orderTotal = computed(() => {
-    return selectedSeats.value.length * TICKET_PRICE + dvdTotal.value;});
+    return selectedSeats.value.length * TICKET_PRICE + dvdTotal.value + SURCHARGE});
 
     const morningId = computed(() => {
       return seatStore.events.filter((seat) => seat.attributes.title === 'Morning Recital')[0].id
@@ -108,6 +109,12 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     // Implementation for order confirmation
   };
 
+  const clearEverything = () => {
+    console.log('clearing everything')
+    clearCheckout()
+    seatStore.clearSeatStore()
+  }
+
   const clearCheckout = () => {
     userInformation.value = {};
     selectedEventDetails.value = {};
@@ -167,5 +174,6 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     afternoonId,
     dvdTotal,
     selectedDvds,
+    clearEverything
   };
 });

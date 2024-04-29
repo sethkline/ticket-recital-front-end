@@ -5,11 +5,11 @@
       description="Reverence Studios Presents"
       cover-image-url="https://a.storyblok.com/f/147058/4032x3024/e9ae3f85b8/wilderness.jpg/m/918x0"
     ></TheHero>
-    <div class="text-center"> 
+    <div class="text-center p-4"> 
       <p v-if="recitalStore.advancedTicketTime">
       Parents of returning seniors, or volunteers 
       </p>
-      <Button @click="$router.push('/purchase-tickets')">Purchase Tickets</Button>
+      <Button w-full @click="$router.push('/purchase-tickets')">Purchase Early Tickets</Button>
     </div>
     <!-- <div class="text-center p-4">
       <div v-if="recitalStore.ticketSalesTime" class="mb-4">
@@ -19,7 +19,7 @@
       </div>
       </div> -->
 
-  </div>∏
+  </div>
 </template>
 <script setup lang="ts">
 
