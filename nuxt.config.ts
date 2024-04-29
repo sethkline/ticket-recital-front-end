@@ -31,7 +31,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/strapi', '@pinia/nuxt', 'nuxt-primevue', 'nuxt-socket-io'],
     strapi: {
-      url: process.env.STRAPI_URL,
+      url: process.env.STRAPI_URL || 'https:recital.reverence.dance/api',
       prefix: '/api',
       admin: '/admin',
       version: 'v4',
@@ -57,7 +57,8 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY
+      STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
+      STRAPI_URL: process.env.STRAPI_URL
     }
   }
 
