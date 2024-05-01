@@ -54,7 +54,7 @@ onMounted(async () => {
           fontSize: '16px',
           fontSmoothing: 'antialiased',
           ':-webkit-autofill': {
-            color: '#fce883'
+            color: '#000'
           },
           '::placeholder': {
             color: 'rgb(71 85 105)'
@@ -96,7 +96,6 @@ const handleSubmit = async () => {
     }
   ];
 
-  console.log(CheckoutStore.selectedMorningSeats);
   const morningTicketInfo = CheckoutStore.selectedMorningSeats.map((seat) => {
     return {
       date: 'March 18th, 2024',
