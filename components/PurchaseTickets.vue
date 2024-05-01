@@ -36,6 +36,9 @@
               CheckoutStore?.selectedEvent?.name === 'Both Recitals'
             "
           >
+          <!-- <div class="flex justify-start">
+            <TicketCountDown></TicketCountDown>
+          </div> -->
             <h2 class="mb-2 text-3xl font-bold">Select Morning Recital Seats</h2>
             <div class="flex flex-wrap gap-3 p-fluid mb-4">
               <div class="flex-auto">
@@ -190,7 +193,6 @@ import StepperPanel from 'primevue/stepperpanel';
 const SeatStore = useSeatStore();
 const CheckoutStore = useCheckoutStore();
 
-// const eventResponse = await find<Event>('events')
 SeatStore.selectedEvent = null;
 await SeatStore.fetchEvents();
 
@@ -199,7 +201,6 @@ const numberOfEveningSeats = ref(0);
 const needsEveningHandicap = ref(false);
 const needsMorningHandicap = ref(false);
 
-// const ticketOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const passwordModal = ref(true);
 const accessPasscode = ref('');

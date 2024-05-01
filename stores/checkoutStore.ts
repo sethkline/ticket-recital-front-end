@@ -127,6 +127,8 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     ticketQuantity.value = 0;
     paymentInformation.value = {};
     orderSummary.value = {};
+    selectedEvent.value = null;
+    childrenInformation.value = []
   };
 
   // const orderTotal = computed(() => {

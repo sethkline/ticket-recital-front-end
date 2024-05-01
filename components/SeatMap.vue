@@ -1,7 +1,13 @@
 <template>
   <div class="seatmap-container">
     <div v-if="isAdmin && adminSelected.length" class="flex">
-    <SplitButton label="Reserve Selected" icon="pi pi-plus" class="mr-2" :model="adminSelectItems" @click="handleAdminReserve"/> 
+      <SplitButton
+        label="Reserve Selected"
+        icon="pi pi-plus"
+        class="mr-2"
+        :model="adminSelectItems"
+        @click="handleAdminReserve"
+      />
     </div>
     <div class="stage-label">Stage</div>
     <div class="seatmap" v-if="Boolean(seats && seats.length)">
@@ -18,7 +24,6 @@
             :showHandicap="showHandicap"
             @toggle-seat="handleSeatToggle"
             class="seat"
-
           />
         </div>
       </div>
@@ -36,57 +41,52 @@ const toast = useToast();
 const SeatStore = useSeatStore();
 const AdminStore = useAdminStore();
 
-// const client = useStrapiClient();
-// const socket = io('http://localhost:1337'); // Adjust this URL to the actual URL of your Strapi server
-
-const props = defineProps<{ seats: SeatResponse[]; hasSelectedAll: boolean; showHandicap: boolean; isAdmin: boolean }>();
-
+const props = defineProps<{
+  seats: SeatResponse[];
+  hasSelectedAll: boolean;
+  showHandicap: boolean;
+  isAdmin: boolean;
+}>();
 
 //admin selected seats functions
 const adminSelectItems = [
-    {
-        label: 'make handicap',
-        icon: 'pi pi-refresh',
-        command: () => {
-          handleHandicapAccess(true);
-        }
-    },
-    {
-        label: 'make available',
-        icon: 'pi pi-times',
-        command: () => {
-            handleAdminReserve(true);
-            toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000 });
-        }
+  {
+    label: 'make handicap',
+    icon: 'pi pi-refresh',
+    command: () => {
+      handleHandicapAccess(true);
     }
+  },
+  {
+    label: 'make available',
+    icon: 'pi pi-times',
+    command: () => {
+      handleAdminReserve(true);
+      toast.add({ severity: 'warn', summary: 'Delete', detail: 'Data Deleted', life: 3000 });
+    }
+  }
 ];
 
-const handleAdminReserve = async(isAvailable = false) => {
+const handleAdminReserve = async (isAvailable = false) => {
   try {
     await AdminStore.updateSeatAvailability(adminSelected.value, isAvailable);
     await SeatStore.fetchBothAvailableSeats();
-    toast.add({ severity: 'success', summary: 'Reserved', detail: isAvailable ? 'Seats Unreserved' : 'Seats Reserved', life: 3000 });
-  }
-  catch (error) {
+    toast.add({
+      severity: 'success',
+      summary: 'Reserved',
+      detail: isAvailable ? 'Seats Unreserved' : 'Seats Reserved',
+      life: 3000
+    });
+  } catch (error) {
     toast.add({ severity: 'warn', summary: 'Error', detail: 'Something went wrong', life: 3000 });
   }
-}
+};
 
-const handleHandicapAccess = async(handicap_access = true) => {
+const handleHandicapAccess = async (handicap_access = true) => {
   await AdminStore.updateHandicapAvailability(adminSelected.value, handicap_access);
   await SeatStore.fetchBothAvailableSeats();
   toast.add({ severity: 'success', summary: 'Reserved', detail: 'Seats Handicap updated', life: 3000 });
-
- }
-
-
-// onMounted(() => {
-//   SeatStore.initializeSocket()
-// });
-
-// onUnmounted(() => {
-//   SeatStore.disconnectSocket();
-// });
+};
 
 const sections = computed(() => [
   leftWingSection.value,
@@ -108,17 +108,6 @@ function getSectionClass(index: number) {
   }
 }
 
-// group seats into sections
-// function organizeSeatsByRow(seats: SeatResponse[]) {
-//   return seats.reduce((acc, seat) => {
-//     const rowKey = seat.attributes.row;
-//     if (!acc[rowKey]) {
-//       acc[rowKey] = [];
-//     }
-//     acc[rowKey].push(seat);
-//     return acc;
-//   }, {});
-// }
 function organizeSeatsByRow(seats) {
   const grouped = seats.reduce((acc, seat) => {
     const rowKey = seat.attributes.row;
@@ -130,7 +119,7 @@ function organizeSeatsByRow(seats) {
   }, {});
 
   // Sort each row by `display_order`
-  Object.keys(grouped).forEach(rowKey => {
+  Object.keys(grouped).forEach((rowKey) => {
     grouped[rowKey].sort((a, b) => a.attributes.display_order - b.attributes.display_order);
   });
 
@@ -143,7 +132,7 @@ function sortGroupedSeatsByRow(groupedSeats) {
 
   // Construct a new object with sorted keys and their corresponding values
   const sortedGroupedSeats = {};
-  sortedKeys.forEach(key => {
+  sortedKeys.forEach((key) => {
     sortedGroupedSeats[key] = groupedSeats[key];
   });
 
@@ -161,7 +150,7 @@ const leftWingSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const leftWingSeats = props.seats.filter((seat) => seat.attributes.section === 'left-wing');
   const rows = organizeSeatsByRow(leftWingSeats);
-  const sortedRows = sortGroupedSeatsByRow(rows)
+  const sortedRows = sortGroupedSeatsByRow(rows);
   return sortedRows;
 });
 
@@ -169,32 +158,31 @@ const rightWingSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const rightWingSeats = props.seats.filter((seat) => seat.attributes.section === 'right-wing');
   const rows = organizeSeatsByRow(rightWingSeats);
-  return sortGroupedSeatsByRow(rows)
+  return sortGroupedSeatsByRow(rows);
 });
 
 const leftMainSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const leftWingSeats = props.seats.filter((seat) => seat.attributes.section === 'left-main');
   const rows = organizeSeatsByRow(leftWingSeats);
-  return sortGroupedSeatsByRow(rows)
+  return sortGroupedSeatsByRow(rows);
 });
 
 const centerMainSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const rightWingSeats = props.seats.filter((seat) => seat.attributes.section === 'center-main');
   const rows = organizeSeatsByRow(rightWingSeats);
-  return sortGroupedSeatsByRow(rows)
+  return sortGroupedSeatsByRow(rows);
 });
 
 const rightMainSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const rightWingSeats = props.seats.filter((seat) => seat.attributes.section === 'right-main');
   const rows = organizeSeatsByRow(rightWingSeats);
-  return sortGroupedSeatsByRow(rows)
-
+  return sortGroupedSeatsByRow(rows);
 });
 
-const adminSelected = ref([])
+const adminSelected = ref([]);
 
 const handleSeatToggle = async (seatId: string, isSelected: boolean, revertCallback: () => void) => {
   if (props.isAdmin) {
@@ -204,7 +192,7 @@ const handleSeatToggle = async (seatId: string, isSelected: boolean, revertCallb
     } else {
       adminSelected.value = adminSelected.value.filter((id) => id !== seatId);
     }
-    return
+    return;
   }
 
   try {

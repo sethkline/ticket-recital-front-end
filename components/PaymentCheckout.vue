@@ -27,8 +27,6 @@ const toast = useToast();
 const router = useRouter();
 const config = useRuntimeConfig();
 let stripePromise = loadStripe(config.public.STRIPE_PUBLIC_KEY);
-// let stripe = await loadStripe(config.public.STRIPE_PUBLIC_KEY);
-// let elements = stripe.elements();
 let stripe, elements, cardElement;
 
 const client = useStrapiClient();
