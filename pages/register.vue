@@ -7,7 +7,7 @@
           <InputText v-model="loginInfo.identifier" placeholder="Email *" class="mb-3 flex-1" />
           <Password v-model="loginInfo.password" :feedback="false" placeholder="Password *" toggle-mask class="mb-3 flex-1" />
         </div>
-        <Button label="Login" @click="handleLogin" class="mt-4 w-full sm:w-auto" />
+        <Button label="Login" type="submit" @click="handleLogin" class="mt-4 w-full sm:w-auto" />
         <p class="mt-4 text-center sm:text-left">
           Don't have an account? <a href="#" @click="toggleView" class="text-blue-500">Register</a>
         </p>

@@ -89,6 +89,7 @@ export const useAdminStore = defineStore('useAdminStore', () => {
       }
     } catch (error) {
       console.error('Failed to make seats unavailable:', error);
+      throw error;
     }
   }
   const updateHandicapAvailability = async (eventIds: string, handicap_access = true) => {

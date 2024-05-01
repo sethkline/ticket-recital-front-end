@@ -31,7 +31,6 @@ import { useSeatStore } from '~/stores/seatStore';
 import { useAdminStore } from '~/stores/adminStore';
 import type { SeatResponse } from '~/types/seat';
 import { useToast } from 'primevue/usetoast';
-import SeatPicker from './SeatPicker.vue';
 const toast = useToast();
 
 const SeatStore = useSeatStore();
@@ -63,9 +62,14 @@ const adminSelectItems = [
 ];
 
 const handleAdminReserve = async(isAvailable = false) => {
-  await AdminStore.updateSeatAvailability(adminSelected.value, isAvailable);
-  await SeatStore.fetchBothAvailableSeats();
-  toast.add({ severity: 'success', summary: 'Reserved', detail: isAvailable ? 'Seats Unreserved' : 'Seats Reserved', life: 3000 });
+  try {
+    await AdminStore.updateSeatAvailability(adminSelected.value, isAvailable);
+    await SeatStore.fetchBothAvailableSeats();
+    toast.add({ severity: 'success', summary: 'Reserved', detail: isAvailable ? 'Seats Unreserved' : 'Seats Reserved', life: 3000 });
+  }
+  catch (error) {
+    toast.add({ severity: 'warn', summary: 'Error', detail: 'Something went wrong', life: 3000 });
+  }
 }
 
 const handleHandicapAccess = async(handicap_access = true) => {
@@ -105,8 +109,18 @@ function getSectionClass(index: number) {
 }
 
 // group seats into sections
-function organizeSeatsByRow(seats: SeatResponse[]) {
-  return seats.reduce((acc, seat) => {
+// function organizeSeatsByRow(seats: SeatResponse[]) {
+//   return seats.reduce((acc, seat) => {
+//     const rowKey = seat.attributes.row;
+//     if (!acc[rowKey]) {
+//       acc[rowKey] = [];
+//     }
+//     acc[rowKey].push(seat);
+//     return acc;
+//   }, {});
+// }
+function organizeSeatsByRow(seats) {
+  const grouped = seats.reduce((acc, seat) => {
     const rowKey = seat.attributes.row;
     if (!acc[rowKey]) {
       acc[rowKey] = [];
@@ -114,6 +128,26 @@ function organizeSeatsByRow(seats: SeatResponse[]) {
     acc[rowKey].push(seat);
     return acc;
   }, {});
+
+  // Sort each row by `display_order`
+  Object.keys(grouped).forEach(rowKey => {
+    grouped[rowKey].sort((a, b) => a.attributes.display_order - b.attributes.display_order);
+  });
+
+  return grouped;
+}
+
+function sortGroupedSeatsByRow(groupedSeats) {
+  // Create an array of keys (rows), sort them alphabetically
+  const sortedKeys = Object.keys(groupedSeats).sort();
+
+  // Construct a new object with sorted keys and their corresponding values
+  const sortedGroupedSeats = {};
+  sortedKeys.forEach(key => {
+    sortedGroupedSeats[key] = groupedSeats[key];
+  });
+
+  return sortedGroupedSeats;
 }
 
 function sortSeatsByDisplayOrder(rows) {
@@ -127,35 +161,37 @@ const leftWingSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const leftWingSeats = props.seats.filter((seat) => seat.attributes.section === 'left-wing');
   const rows = organizeSeatsByRow(leftWingSeats);
-  return sortSeatsByDisplayOrder(rows);
+  const sortedRows = sortGroupedSeatsByRow(rows)
+  return sortedRows;
 });
 
 const rightWingSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const rightWingSeats = props.seats.filter((seat) => seat.attributes.section === 'right-wing');
   const rows = organizeSeatsByRow(rightWingSeats);
-  return sortSeatsByDisplayOrder(rows);
+  return sortGroupedSeatsByRow(rows)
 });
 
 const leftMainSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const leftWingSeats = props.seats.filter((seat) => seat.attributes.section === 'left-main');
   const rows = organizeSeatsByRow(leftWingSeats);
-  return sortSeatsByDisplayOrder(rows);
+  return sortGroupedSeatsByRow(rows)
 });
 
 const centerMainSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const rightWingSeats = props.seats.filter((seat) => seat.attributes.section === 'center-main');
   const rows = organizeSeatsByRow(rightWingSeats);
-  return sortSeatsByDisplayOrder(rows);
+  return sortGroupedSeatsByRow(rows)
 });
 
 const rightMainSection = computed(() => {
   if (!props.seats || props.seats.length === 0) return [];
   const rightWingSeats = props.seats.filter((seat) => seat.attributes.section === 'right-main');
   const rows = organizeSeatsByRow(rightWingSeats);
-  return sortSeatsByDisplayOrder(rows);
+  return sortGroupedSeatsByRow(rows)
+
 });
 
 const adminSelected = ref([])
