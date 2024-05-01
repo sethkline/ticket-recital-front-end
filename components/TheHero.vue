@@ -10,7 +10,6 @@
         <div class="mt-6 space-y-6 font-display text-2xl tracking-wide text-blue-900">
           <p>Buy your Tickets for Reverence Studios 2024 Spring Recital</p>
         </div>
-        {{ recitalStore.ticketSalesTime }}
         <Button v-if="recitalStore.ticketSalesTime" @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
         <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" />
         <dl
