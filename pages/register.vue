@@ -1,6 +1,10 @@
 <template>
   <div class="flex flex-col items-center pt-4 min-h-screen bg-gray-100">
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col">
+      <p class="text-gray-800 text-sm mb-4">
+        <strong>Note:</strong> This registration and login is separate from your dance class account. 
+        If this is your first time here, you will need to create a new account.
+      </p>
       <div v-if="isLogin" class="mb-4">
         <h2 class="font-bold text-lg mb-2">Login</h2>
         <div class="flex flex-col sm:flex-row space-x-0 sm:space-x-2">
