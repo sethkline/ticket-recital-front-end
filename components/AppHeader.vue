@@ -1,5 +1,5 @@
 <template>
-  <header class="relative z-50 flex-none lg:pt-11">
+  <header class="relative z-50 flex-none lg:pt-11 print:hidden">
     <Container class="flex flex-wrap items-center justify-center sm:justify-between lg:flex-nowrap">
       <div class="mt-10 lg:mt-0 lg:grow lg:basis-0">
         <button @click="$router.push('/')" class="inline-flex items-center">

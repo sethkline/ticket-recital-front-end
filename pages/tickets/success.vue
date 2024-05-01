@@ -4,6 +4,7 @@
       <h1 class="text-3xl font-bold text-green-600 mb-4">Payment Successful</h1>
       <p class="text-gray-700 mb-3">Thank you for your payment. You have recieved an email confirmation of your tickets.</p>
       <p class="text-gray-700 mb-6">Feel free to view your tickets by clicking the View Tickets button.</p>
+      <p class="text-gray-700 mb-6">To print the tickets make sure you turn on print background images or the background will not show up.</p>
 
       <!-- Buttons with PrimeVue components -->
       <div class="flex justify-center gap-4">

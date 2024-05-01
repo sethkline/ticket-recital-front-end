@@ -1,6 +1,6 @@
 <template>
   <div class="p-4">
-    <Button @click="printTickets" class="print-button">Print Tickets</Button>
+    <Button @click="printTickets" class="print-button print:hidden py-3">Print Tickets</Button>
     <div v-if="tickets.length > 0" class="space-y-4">
       <div v-for="ticket in tickets" :key="ticket.id" class="ticket" :style="backgroundStyle(ticket)">
         <div class="ticket-content">
@@ -36,7 +36,7 @@ const fetchTickets = async () => {
 };
 const backgroundStyle = (ticket) => {
   const morningImagePath = `https://a.storyblok.com/f/147058/2289x769/fffff3e58e/2024_recitalam.jpg/m/763x256`;
-  const afternoonImagePath = `https://a.storyblok.com/f/147058/2289x769/0877f071af/2024_recitalpm.jpg/m/763x256`;
+  const afternoonImagePath = `https://a.storyblok.com/f/147058/2289x769/c73bc32bce/2024_recitalpm.jpg/m/763x256`;
   const imageUrl = ticket.event.title === 'Morning Recital' ? morningImagePath : afternoonImagePath;
   return {
     backgroundImage: `url(${imageUrl})`
