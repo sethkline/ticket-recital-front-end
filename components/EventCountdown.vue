@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h3>Time until event: {{ countdown }}</h3>
+    <h3>Time until the Recital: {{ countdown }}</h3>
   </div>
 </template>
 

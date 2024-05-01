@@ -1,6 +1,20 @@
 <template>
   <div class="p-4">
-    <Button @click="printTickets" class="print-button print:hidden py-3">Print Tickets</Button>
+    <div class="flex space-x-4 align-bottom mb-3">
+      <div>
+        <Button @click="printTickets" class="print-button print:hidden py-3 mb-2">Print Tickets</Button>
+
+      </div>
+    <div class="mt-4 text-sm print:hidden text-gray-600">
+        <h4 class="font-semibold">Printing your Tickets:</h4>
+        <p>If your tickets do not print with the background images:</p>
+        <ul class="list-disc pl-5">
+          <li>Check your printer settings to ensure 'Print Background Images' is enabled.</li>
+          <li>This setting is often found under 'More Settings' in your print dialog.</li>
+        </ul>
+      </div>
+
+    </div>
     <div v-if="tickets.length > 0" class="space-y-4">
       <div v-for="ticket in tickets" :key="ticket.id" class="ticket" :style="backgroundStyle(ticket)">
         <div class="ticket-content">
@@ -13,7 +27,8 @@
     <div v-else class="text-center">
       <p>You have no tickets purchased.</p>
     </div>
-  </div>
+
+    </div>
 </template>
 
 
