@@ -96,7 +96,7 @@ const handleSubmit = async () => {
 
   const morningTicketInfo = CheckoutStore.selectedMorningSeats.map((seat) => {
     return {
-      date: 'March 18th, 2024',
+      date: 'May 18th, 2024',
       time: '10:30 AM',
       row: seat?.attributes?.row ?? null,
       seat: seat?.attributes?.number ?? null,
@@ -106,8 +106,8 @@ const handleSubmit = async () => {
 
   const afternoonTicketInfo = CheckoutStore.selectedAfternoonSeats.map((seat) => {
     return {
-      date: 'March 18th, 2024',
-      time: '12:30 PM',
+      date: 'May 18th, 2024',
+      time: '2:00 PM',
       row: seat?.attributes?.row ?? null,
       seat: seat?.attributes?.number ?? null,
       backgroundImage: 'afternoon'
