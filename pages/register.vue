@@ -12,9 +12,12 @@
           <Password v-model="loginInfo.password" :feedback="false" placeholder="Password *" toggle-mask class="mb-3 flex-1" />
         </div>
         <Button label="Login" type="submit" @click="handleLogin" class="mt-4 w-full sm:w-auto" />
-        <p class="mt-4 text-center sm:text-left">
-          Don't have an account? <a href="#" @click="toggleView" class="text-blue-500">Register</a>
-        </p>
+        <div class="flex justify-between mt-4">
+          <p class="text-center sm:text-left">
+            Don't have an account? <a href="#" @click="toggleView" class="text-blue-500">Register</a>
+          </p>
+          <p class="text-center sm:text-left"> <NuxtLink href="/forgot-password" class="text-blue-500">Forgot your password?</NuxtLink></p>
+        </div>
       </div>
       <!-- <LoginForm v-if="isLogin"> -->
 
@@ -61,6 +64,11 @@ const toggleView = () => {
   isLogin.value = !isLogin.value;
 };
 
+const validateEmail = (email) => {
+  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  return re.test(email);
+};
+
 const handleLogin = async () => {
   isLoggingIn.value = true; // Start loading
   try {
@@ -76,9 +84,27 @@ const handleLogin = async () => {
 
 const handleRegister = async () => {
   isLoggingIn.value = true; // Start loading
+
+   // Validate email syntax
+   if (!validateEmail(registerInfo.value.email)) {
+    toast.add({ severity: 'error', summary: 'Register Error', detail: 'Invalid email format', life: 3000 });
+    return;
+  }
+
+   // Check name length
+   if (registerInfo.value.firstName.length < 2 || registerInfo.value.lastName.length < 2) {
+    toast.add({ severity: 'error', summary: 'Register Error', detail: 'First and last name must be at least 2 characters', life: 3000 });
+    return;
+  }
+
   // Check if passwords match
   if (registerInfo.value.password !== registerInfo.value.confirmPassword) {
     toast.add({ severity: 'error', summary: 'Register Error', detail: 'Passwords do not match', life: 3000 });
+    return;
+  }
+    // Check password length
+    if (registerInfo.value.password.length < 6) {
+    toast.add({ severity: 'error', summary: 'Register Error', detail: 'Password must be at least 6 characters long', life: 3000 });
     return;
   }
   // if name is empty, give error
@@ -93,7 +119,9 @@ const handleRegister = async () => {
     await register({
       username: registerInfo.value.email,
       email: registerInfo.value.email,
-      password: registerInfo.value.password
+      password: registerInfo.value.password,
+      first_name: registerInfo.value.firstName,
+      last_name: registerInfo.value.lastName
     });
     router.push('/purchase-tickets');
   } catch (e) {
