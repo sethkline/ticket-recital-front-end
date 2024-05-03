@@ -2,21 +2,29 @@
   <div class="flex flex-col items-center pt-4 min-h-screen bg-gray-100">
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col">
       <p class="text-gray-800 text-sm mb-4">
-        <strong>Note:</strong> This registration and login is separate from your dance class account. 
-        If this is your first time here, you will need to create a new account.
+        <strong>Note:</strong> This registration and login is separate from your dance class account. If this is your
+        first time here, you will need to create a new account.
       </p>
       <div v-if="isLogin" class="mb-4">
         <h2 class="font-bold text-lg mb-2">Login</h2>
         <div class="flex flex-col sm:flex-row space-x-0 sm:space-x-2">
           <InputText v-model="loginInfo.identifier" placeholder="Email *" class="mb-3 flex-1" />
-          <Password v-model="loginInfo.password" :feedback="false" placeholder="Password *" toggle-mask class="mb-3 flex-1" />
+          <Password
+            v-model="loginInfo.password"
+            :feedback="false"
+            placeholder="Password *"
+            toggle-mask
+            class="mb-3 flex-1"
+          />
         </div>
         <Button label="Login" type="submit" @click="handleLogin" class="mt-4 w-full sm:w-auto" />
         <div class="flex justify-between mt-4">
           <p class="text-center sm:text-left">
             Don't have an account? <a href="#" @click="toggleView" class="text-blue-500">Register</a>
           </p>
-          <p class="text-center sm:text-left"> <NuxtLink href="/forgot-password" class="text-blue-500">Forgot your password?</NuxtLink></p>
+          <p class="text-center sm:text-left">
+            <NuxtLink href="/forgot-password" class="text-blue-500">Forgot your password?</NuxtLink>
+          </p>
         </div>
       </div>
       <!-- <LoginForm v-if="isLogin"> -->
@@ -64,11 +72,6 @@ const toggleView = () => {
   isLogin.value = !isLogin.value;
 };
 
-const validateEmail = (email) => {
-  const re = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-  return re.test(email);
-};
-
 const handleLogin = async () => {
   isLoggingIn.value = true; // Start loading
   try {
@@ -85,15 +88,14 @@ const handleLogin = async () => {
 const handleRegister = async () => {
   isLoggingIn.value = true; // Start loading
 
-   // Validate email syntax
-   if (!validateEmail(registerInfo.value.email)) {
-    toast.add({ severity: 'error', summary: 'Register Error', detail: 'Invalid email format', life: 3000 });
-    return;
-  }
-
-   // Check name length
-   if (registerInfo.value.firstName.length < 2 || registerInfo.value.lastName.length < 2) {
-    toast.add({ severity: 'error', summary: 'Register Error', detail: 'First and last name must be at least 2 characters', life: 3000 });
+  // Check name length
+  if (registerInfo.value.firstName.length < 2 || registerInfo.value.lastName.length < 2) {
+    toast.add({
+      severity: 'error',
+      summary: 'Register Error',
+      detail: 'First and last name must be at least 2 characters',
+      life: 3000
+    });
     return;
   }
 
@@ -102,9 +104,14 @@ const handleRegister = async () => {
     toast.add({ severity: 'error', summary: 'Register Error', detail: 'Passwords do not match', life: 3000 });
     return;
   }
-    // Check password length
-    if (registerInfo.value.password.length < 6) {
-    toast.add({ severity: 'error', summary: 'Register Error', detail: 'Password must be at least 6 characters long', life: 3000 });
+  // Check password length
+  if (registerInfo.value.password.length < 6) {
+    toast.add({
+      severity: 'error',
+      summary: 'Register Error',
+      detail: 'Password must be at least 6 characters long',
+      life: 3000
+    });
     return;
   }
   // if name is empty, give error
