@@ -62,9 +62,11 @@ const printTickets = () => {
   window.print();
 };
 
-const formatDate = (dateStr) => {
-  const date = new Date(dateStr);
-  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+const formatDate = (dateStr: string) => {
+  // Create a Date object using UTC time
+  const date = new Date(`${dateStr}T00:00:00Z`);
+  // Format the date using UTC methods to avoid time zone issues
+  return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`;
 };
 
 onMounted(() => {
