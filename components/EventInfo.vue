@@ -5,8 +5,8 @@
       description="Reverence Studios Presents"
       cover-image-url="https://a.storyblok.com/f/147058/4032x3024/e9ae3f85b8/wilderness.jpg/m/918x0"
     ></TheHero>
-    <div class="text-center p-4"> 
-      <p v-if="recitalStore.advancedTicketTime">
+    <div v-if="recitalStore.advancedTicketTime" class="text-center p-4"> 
+      <p>
       Parents of returning seniors, or volunteers 
       </p>
       <Button w-full @click="$router.push('/purchase-tickets')">Purchase Early Tickets</Button>

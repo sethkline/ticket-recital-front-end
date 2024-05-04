@@ -188,10 +188,12 @@
 import { useSeatStore } from '~/stores/seatStore';
 import { useCheckoutStore } from '~/stores/checkoutStore';
 import StepperPanel from 'primevue/stepperpanel';
+import Recitals from '~/pages/Recitals.vue';
 
 // const { events, fetchEvents, fetchSeats, seats } = useSeatStore();
 const SeatStore = useSeatStore();
 const CheckoutStore = useCheckoutStore();
+const recitalStore = useRecitalStore();
 
 SeatStore.selectedEvent = null;
 await SeatStore.fetchEvents();
@@ -202,7 +204,7 @@ const needsEveningHandicap = ref(false);
 const needsMorningHandicap = ref(false);
 
 
-const passwordModal = ref(true);
+const passwordModal = ref(!recitalStore.ticketSalesTime);
 const accessPasscode = ref('');
 const earlyAccessType = ref('');
 
@@ -241,6 +243,7 @@ const handleEarlyAccess = async () => {
 };
 
 const isLoadingSeats = ref(false);
+
 </script>
 
 <style scoped></style>
