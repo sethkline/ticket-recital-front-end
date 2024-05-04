@@ -204,7 +204,7 @@ const needsEveningHandicap = ref(false);
 const needsMorningHandicap = ref(false);
 
 
-const passwordModal = ref(!recitalStore.ticketSalesTime);
+const passwordModal = ref(false);
 const accessPasscode = ref('');
 const earlyAccessType = ref('');
 
