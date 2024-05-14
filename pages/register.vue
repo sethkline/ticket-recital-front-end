@@ -76,7 +76,7 @@ const handleLogin = async () => {
   isLoggingIn.value = true; // Start loading
   try {
     await login(loginInfo.value);
-    router.push('/purchase-tickets');
+    router.push('/profile');
   } catch (e) {
     console.warn(e);
     toast.add({ severity: 'error', summary: 'Login Error', detail: 'Invalid email or password', life: 3000 });
