@@ -36,6 +36,9 @@ const handleLogin = async () => {
   <Button label="Login" type="submit" @click="handleLogin" class="mt-4 w-full sm:w-auto" />
   <div class="flex justify-between mt-4">
     <p class="text-center sm:text-left">
+            Don't have an account? <NuxtLink href="/register" class="text-blue-500">Register</NuxtLink>
+          </p>
+    <p class="text-center sm:text-left">
       <NuxtLink href="/forgot-password" class="text-blue-500">Forgot your password?</NuxtLink>
     </p>
   </div>
