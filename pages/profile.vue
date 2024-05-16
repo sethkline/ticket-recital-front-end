@@ -6,9 +6,9 @@
       <ShowUsersTickets />
     </Fieldset>
     <!-- <UserTickets :tickets="tickets" /> -->
-    <div class="flex justify-center print:hidden">
+    <!-- <div class="flex justify-center print:hidden">
       <EventCountdown :event="nextEvent" />
-    </div>
+    </div> -->
     <!-- <Fieldset legend="Directions" :toggleable="true">
       <p class="m-0">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
@@ -29,13 +29,13 @@
       </p> -->
     <!-- <AuditoriumMap :seats="userSeats" /> -->
     <!-- </Fieldset> -->
-    <div class="w-full text-center print:hidden">
+    <!-- <div class="w-full text-center print:hidden">
       <Button class="size=large" link>
         <NuxtLink to="/purchase-tickets">
           Buy Tickets
         </NuxtLink>
         </Button>
-    </div>
+    </div> -->
   </div>
 </template>
 
