@@ -13,9 +13,13 @@
 
     <SelectButton v-model="selectedEvent" :options="eventOptions" optionLabel="name" />
     <hr>
-    <div>
+    <!-- <div>
       <h2 class="font-bold text-lg mb-2">Seats</h2>
       <SeatMap/>
+    </div> -->
+
+    <div class="p-4 flex space-x-2">
+      <Button @click="generateCSV">Generate CSV</Button>
     </div>
 
   </div>
@@ -63,6 +67,31 @@ const seedSeats = async () => {
 
   }
 }
+
+const generateCSV = async () => {
+  try {
+    const response = await client('/orders/csv-report', {
+      method: 'GET',
+      responseType: 
+      'blob'
+    });
+
+    // Create a Blob from the binary data
+    const blob = new Blob([response], { type: 'application/zip' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orders-reports.zip';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error generating CSV:', error);
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to generate CSV', life: 3000 });
+  }
+}
+
 </script>
 
 
