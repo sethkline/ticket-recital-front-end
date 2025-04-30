@@ -12,7 +12,7 @@
         <div class="mx-auto flex items-center gap-4 px-4">
           <p>
             <time dateTime="2022-04-04">Reverence Studios Dance Recital - </time>
-            <time dateTime="2022-04-06">May 18, 2024</time>
+            <time dateTime="2022-04-06">May 17, 2025</time>
           </p>
           <p>Mechanicsburg, PA</p>
         </div>
@@ -21,7 +21,7 @@
       
       <div class="hidden sm:mt-10 sm:flex lg:mt-0 lg:grow lg:basis-0 lg:justify-end">
         <Button v-if="recitalStore.ticketSalesTime" label="Buy Tickets" @click="router.push('/purchase-tickets')" />
-        <!-- <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" /> -->
+        <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" />
 
         
       </div>
@@ -37,11 +37,11 @@ const user = useStrapiUser();
 const recitalStore = useRecitalStore();
 const { recital } = storeToRefs(recitalStore);
 
-// const ticketSalesStarted = computed(() => {
-//   const now = new Date();
-//   const ticketSaleStart = new Date(recital.value?.attributes?.ticket_sale_start);
-//   return ticketSaleStart < now;
-// });
+const ticketSalesStarted = computed(() => {
+  const now = new Date();
+  const ticketSaleStart = new Date(recital.value?.attributes?.ticket_sale_start);
+  return ticketSaleStart < now;
+});
 
 const handleLogout = () => {
   logout();

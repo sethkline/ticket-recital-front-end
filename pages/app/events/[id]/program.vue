@@ -1,6 +1,6 @@
 <template>
   <div>
-    countdown until recital
+    Program
   </div>
 </template>
 

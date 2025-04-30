@@ -1,6 +1,6 @@
 <template>
   <div>
-    countdown until recital
+    Attendees Analytics
   </div>
 </template>
 

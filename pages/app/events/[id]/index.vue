@@ -1,6 +1,6 @@
 <template>
   <div>
-    countdown until recital
+    Event ID: {{ $route.params.id }}
   </div>
 </template>
 

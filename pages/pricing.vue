@@ -1,6 +1,6 @@
 <template>
   <div>
-    Verify if the user's child/children are participating in the recital.
+    Pricing
   </div>
 </template>
 

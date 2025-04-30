@@ -5,11 +5,12 @@
     <Container class="relative">
       <div class="mx-auto max-w-2xl lg:max-w-4xl lg:px-12">
         <h1 class="font-display text-4xl pt-2 font-bold tracking-tight text-blue-600 sm:text-7xl">
-          <span class="sr-only">Reverence Studios 2024 Recital - </span>With us in the Wilderness.
+          <span class="sr-only">Reverence Studios 2025 Recital - </span>Echoes of Grace: Stories of Motion
         </h1>
         <div class="mt-6 space-y-6 font-display text-2xl tracking-wide text-blue-900">
-          <p>Buy your Tickets for Reverence Studios 2024 Spring Recital</p>
+          <p>Buy your Tickets for Reverence Studios 2025 Spring Recital</p>
         </div>
+        <!-- TODO add back in conditional to ticketSalesTime -->
         <Button v-if="recitalStore.ticketSalesTime" @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
         <!-- <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" /> -->
         <dl

@@ -1,9 +1,9 @@
 <template>
   <div class="event-info bg-white shadow-lg rounded-lg overflow-hidden">
     <TheHero
-      title="2024 Dance Recital"
+      title="2025 Dance Recital"
       description="Reverence Studios Presents"
-      cover-image-url="https://a.storyblok.com/f/147058/4032x3024/e9ae3f85b8/wilderness.jpg/m/918x0"
+      cover-image-url="https://a.storyblok.com/f/147058/1366x768/ca0c6c20ae/stories-in-motion-hero.jpg/m/918x0"
     ></TheHero>
     <div v-if="recitalStore.advancedTicketTime" class="text-center p-4"> 
       <p>
