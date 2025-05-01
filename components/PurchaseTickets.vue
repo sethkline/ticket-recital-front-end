@@ -1,4 +1,5 @@
 <template>
+   <TicketSalesCountdown2 v-if="showSalesEndingCountdown" />
   <div class="px-4 py-4">
     <h1 class="text-4xl font-bold py-4">Purchase Recital Tickets</h1>
   </div>
@@ -187,6 +188,7 @@
 <script setup lang="ts">
 import { useSeatStore } from '~/stores/seatStore';
 import { useCheckoutStore } from '~/stores/checkoutStore';
+import { useTimeRestrictionStore } from '~/stores/timeRestrictionStore';
 import StepperPanel from 'primevue/stepperpanel';
 import Recitals from '~/pages/Recitals.vue';
 
@@ -194,6 +196,7 @@ import Recitals from '~/pages/Recitals.vue';
 const SeatStore = useSeatStore();
 const CheckoutStore = useCheckoutStore();
 const recitalStore = useRecitalStore();
+const TimeRestrictionStore = useTimeRestrictionStore();
 
 SeatStore.selectedEvent = null;
 await SeatStore.fetchEvents();
@@ -243,6 +246,107 @@ const handleEarlyAccess = async () => {
 };
 
 const isLoadingSeats = ref(false);
+
+const salesStatusMessage = ref('');
+const showSalesEndingCountdown = ref(false);
+const countdownInterval = ref(null);
+
+// Check access on page load
+onMounted(async () => {
+  checkTicketSalesStatus();
+  
+  // Set up countdown timer if sales are active
+  if (TimeRestrictionStore.canPurchaseTickets.allowed) {
+    startSalesEndCountdown();
+  }
+});
+
+// Handle early access submission
+const handleEarlyAccess = async () => {
+  const payload = { 
+    passcode: accessPasscode.value, 
+    earlyAccessType: earlyAccessType.value.value 
+  };
+  
+  isLoadingPasswordModal.value = true;
+  
+  // Set the user type based on selection
+  TimeRestrictionStore.setUserType(earlyAccessType.value.value);
+  
+  // First check if this type of user can purchase yet
+  const salesStatus = TimeRestrictionStore.canPurchaseTickets;
+  
+  if (!salesStatus.allowed) {
+    isLoadingPasswordModal.value = false;
+    salesStatusMessage.value = salesStatus.message;
+    return;
+  }
+  
+  // Then verify the passcode
+  const response = await SeatStore.submitEarlyAccessPasscode(payload);
+  
+  if (response) {
+    passwordModal.value = false;
+    isLoadingPasswordModal.value = false;
+    startSalesEndCountdown(); // Start the countdown after successful access
+  }
+};
+
+// Function to check if ticket sales are active
+function checkTicketSalesStatus() {
+  const now = new Date();
+  
+  // Redirect with message if ticket sales have ended
+  if (now > TimeRestrictionStore.ticketSalesEnd) {
+    router.push({
+      path: '/',
+      query: { message: 'Ticket sales have ended. Thank you for your interest.' }
+    });
+    return;
+  }
+  
+  // For general access (no password entered yet), check if general sales are active
+  if (!TimeRestrictionStore.currentUserType) {
+    const generalSalesActive = now >= TimeRestrictionStore.generalTicketSalesStart;
+    
+    if (!generalSalesActive) {
+      // Not yet general sales time, show early access options
+      passwordModal.value = true;
+      salesStatusMessage.value = `General ticket sales begin ${TimeRestrictionStore.formatDate(TimeRestrictionStore.generalTicketSalesStart)}`;
+    } else {
+      // General sales active, set user type to general
+      TimeRestrictionStore.setUserType('general');
+      startSalesEndCountdown();
+    }
+  }
+}
+
+// Start countdown until ticket sales end
+function startSalesEndCountdown() {
+  showSalesEndingCountdown.value = true;
+  
+  // Update countdown every second
+  countdownInterval.value = setInterval(() => {
+    const remaining = TimeRestrictionStore.timeRemaining;
+    
+    // If time's up, redirect to homepage with message
+    if (remaining.days === 0 && remaining.hours === 0 && 
+        remaining.minutes === 0 && remaining.seconds === 0) {
+      clearInterval(countdownInterval.value);
+      router.push({
+        path: '/',
+        query: { message: 'Ticket sales have ended. Thank you for your interest.' }
+      });
+    }
+  }, 1000);
+}
+
+// Clean up interval when component is destroyed
+onBeforeUnmount(() => {
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value);
+  }
+});
 
 </script>
 
