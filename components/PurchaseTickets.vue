@@ -252,8 +252,6 @@ onMounted(async () => {
 
 // Handle early access submission
 const handleEarlyAccess = async () => {
-  console.log('handleEarlyAccess');
-  debugger
   const payload = { 
     passcode: accessPasscode.value, 
     earlyAccessType: earlyAccessType.value.value 
