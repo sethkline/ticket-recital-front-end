@@ -10,8 +10,15 @@ export const useTimeRestrictionStore = defineStore('timeRestriction', {
       ticketSalesEnd: import.meta.env.VITE_TICKET_SALES_END || '2025-05-16T23:59:59',
     };
     
-    // Load user type from localStorage if available
-    const savedUserType = localStorage.getItem('userType') || null;
+    // Safely check if localStorage is available
+    let savedUserType = null;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        savedUserType = localStorage.getItem('userType') || null;
+      } catch (e) {
+        console.warn('Unable to access localStorage:', e);
+      }
+    }
     
     return {
       seniorTicketSalesStart: new Date(config.seniorTicketSalesStart),
@@ -79,8 +86,14 @@ export const useTimeRestrictionStore = defineStore('timeRestriction', {
     
     setUserType(type) {
       this.currentUserType = type;
-      // Persist the user type
-      localStorage.setItem('userType', type);
+      // Safely persist the user type
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          localStorage.setItem('userType', type);
+        } catch (e) {
+          console.warn('Unable to save to localStorage:', e);
+        }
+      }
     },
     
     // Add this method to handle potential date errors
