@@ -1,14 +1,26 @@
 import { defineStore } from 'pinia';
 
 export const useTimeRestrictionStore = defineStore('timeRestriction', {
-  state: () => ({
-    // Configure these dates for your specific requirements
-    seniorTicketSalesStart: new Date('2025-05-10T09:00:00'),  // When seniors can start buying
-    volunteerTicketSalesStart: new Date('2025-05-11T09:00:00'), // When volunteers can start buying
-    generalTicketSalesStart: new Date('2025-05-15T09:00:00'),  // When general public can buy
-    ticketSalesEnd: new Date('2025-06-01T23:59:59'),          // When all sales end
-    currentUserType: null, // 'senior', 'volunteer', or 'general'
-  }),
+  state: () => {
+    // Get dates from environment variables or config service
+    const config = {
+      seniorTicketSalesStart: import.meta.env.VITE_SENIOR_SALES_START || '2025-05-01T09:00:00',
+      volunteerTicketSalesStart: import.meta.env.VITE_VOLUNTEER_SALES_START || '2025-05-03T09:00:00',
+      generalTicketSalesStart: import.meta.env.VITE_GENERAL_SALES_START || '2025-05-5T09:00:00',
+      ticketSalesEnd: import.meta.env.VITE_TICKET_SALES_END || '2025-05-16T23:59:59',
+    };
+    
+    // Load user type from localStorage if available
+    const savedUserType = localStorage.getItem('userType') || null;
+    
+    return {
+      seniorTicketSalesStart: new Date(config.seniorTicketSalesStart),
+      volunteerTicketSalesStart: new Date(config.volunteerTicketSalesStart),
+      generalTicketSalesStart: new Date(config.generalTicketSalesStart),
+      ticketSalesEnd: new Date(config.ticketSalesEnd),
+      currentUserType: savedUserType,
+    };
+  },
   
   getters: {
     canPurchaseTickets() {
@@ -67,6 +79,27 @@ export const useTimeRestrictionStore = defineStore('timeRestriction', {
     
     setUserType(type) {
       this.currentUserType = type;
+      // Persist the user type
+      localStorage.setItem('userType', type);
+    },
+    
+    // Add this method to handle potential date errors
+    validateDates() {
+      const dates = [
+        this.seniorTicketSalesStart,
+        this.volunteerTicketSalesStart,
+        this.generalTicketSalesStart,
+        this.ticketSalesEnd
+      ];
+      
+      // Check if any date is invalid
+      const hasInvalidDate = dates.some(date => isNaN(date.getTime()));
+      if (hasInvalidDate) {
+        console.error('Invalid date format in TimeRestrictionStore');
+        // You could also reset to defaults or take other recovery actions
+      }
+      
+      return !hasInvalidDate;
     }
   }
 });

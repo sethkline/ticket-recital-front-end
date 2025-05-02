@@ -50,8 +50,8 @@ const fetchTickets = async () => {
   }
 };
 const backgroundStyle = (ticket) => {
-  const morningImagePath = `https://a.storyblok.com/f/147058/2289x769/fffff3e58e/2024_recitalam.jpg/m/763x256`;
-  const afternoonImagePath = `https://a.storyblok.com/f/147058/2289x769/c73bc32bce/2024_recitalpm.jpg/m/763x256`;
+  const morningImagePath = `https://a.storyblok.com/f/147058/2289x769/ccf5a13749/2025-ticket-morning.jpg/m/763x256`;
+  const afternoonImagePath = `https://a.storyblok.com/f/147058/2289x769/ef58e193a2/2025-ticket-afternoon.jpg/m/763x256`;
   const imageUrl = ticket.event.title === 'Morning Recital' ? morningImagePath : afternoonImagePath;
   return {
     backgroundImage: `url(${imageUrl})`
