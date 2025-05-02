@@ -234,17 +234,6 @@ const handleSelectBothSeats = async (goToNextStep: () => void) => {
 };
 
 const isLoadingPasswordModal = ref(false);
-const handleEarlyAccess = async () => {
-  const payload = { passcode: accessPasscode.value, earlyAccessType: earlyAccessType.value.value };
-  isLoadingPasswordModal.value = true;
-  passwordModal.value = true;
-  const response = await SeatStore.submitEarlyAccessPasscode(payload);
-  if (response) {
-    passwordModal.value = false;
-    isLoadingPasswordModal.value = false;
-  }
-};
-
 const isLoadingSeats = ref(false);
 
 const salesStatusMessage = ref('');
