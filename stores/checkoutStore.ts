@@ -3,7 +3,6 @@ import { ref, computed } from 'vue';
 import { useSeatStore } from './seatStore';
 
 export const useCheckoutStore = defineStore('checkout-store', () => {
-
   const seatStore = useSeatStore();
 
   const userInformation = ref({});
@@ -13,67 +12,68 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
   // ids of selected seats
   const selectedSeats = ref([]);
   const selectedSeatsDetails = ref([]);
-  const selectedShow = ref()
-  const selectEventDetails = ref(null)
+  const selectedShow = ref();
+  const selectEventDetails = ref(null);
   const ticketQuantity = ref(0);
   const paymentInformation = ref({});
   const orderSummary = ref({});
-  const selectedDvds = ref(0)
+  const selectedDvds = ref(0);
+  const selectedDigitalDownloads = ref(0);
 
   const TICKET_PRICE = 18;
   const DVD_PRICE = 30;
-  const SURCHARGE = 5
+  const DIGITAL_PRICE = 20;
+  const BUNDLE_DISCOUNT = 5; // Discount when purchasing both DVD and digital
+  const SURCHARGE = 5;
 
-  // const selectedEventDetailsDetails = ref({
-  //   morningShow: { price: 50, quantity: 1 },
-  //   afternoonShow: { price: 50, quantity: 1 },
-  //   taxRate: 0.15  // 15% tax rate for example
-  // });
+  const ticketNumbers = computed(() => {
+    if (selectedSeatsDetails.value.length === 0) return [];
+    return selectedSeatsDetails.value.map(seat => seat.number);
+  });
 
-  // const ticketQuickTotal = computed(() => {
-  //   return selectedSeatsDetails.value.length * 20
-  // })
+  const dvdTotal = computed(() => {
+    return selectedDvds.value * DVD_PRICE;
+  });
 
-  const ticketNumbers = computed(():string[] => {
-    if (selectedSeatsDetails.value.length === 0) return []
-    return selectedSeatsDetails.value.map(seat => seat.number)
-  })
+  const digitalTotal = computed(() => {
+    return selectedDigitalDownloads.value * DIGITAL_PRICE;
+  });
 
+  // Calculate bundle discount if both DVD and digital are selected
+  const discountTotal = computed(() => {
+    return (selectedDvds.value > 0 && selectedDigitalDownloads.value > 0) ? BUNDLE_DISCOUNT : 0;
+  });
 
   const orderTotal = computed(() => {
-    return selectedSeats.value.length * TICKET_PRICE + dvdTotal.value + SURCHARGE});
+    const seatTotal = selectedSeats.value.length * TICKET_PRICE;
+    return seatTotal + dvdTotal.value + digitalTotal.value + SURCHARGE - discountTotal.value;
+  });
 
-    const morningId = computed(() => {
-      return seatStore.events.filter((seat) => seat.attributes.title === 'Morning Recital')[0].id
-    })
+  const morningId = computed(() => {
+    const morningEvent = seatStore.events.filter((seat) => seat.attributes.title === 'Morning Recital');
+    return morningEvent.length > 0 ? morningEvent[0].id : null;
+  });
 
-    const afternoonId = computed(() => {
-      return seatStore.events.filter((seat) => seat.attributes.title === 'Afternoon Recital')[0].id
-    })
+  const afternoonId = computed(() => {
+    const afternoonEvent = seatStore.events.filter((seat) => seat.attributes.title === 'Afternoon Recital');
+    return afternoonEvent.length > 0 ? afternoonEvent[0].id : null;
+  });
 
-    const selectedMorningSeats = computed(() => {
-      return selectedSeatsDetails.value.filter((seat) => seat.eventId === morningId.value)
-    })
-    const selectedAfternoonSeats = computed(() => {
-      return selectedSeatsDetails.value.filter((seat) => seat.eventId === afternoonId.value)
-    })
+  const selectedMorningSeats = computed(() => {
+    return selectedSeatsDetails.value.filter((seat) => seat.eventId === morningId.value);
+  });
 
-    const morningTotal = computed(() => {
-      return selectedMorningSeats.value.length * TICKET_PRICE
-    })
+  const selectedAfternoonSeats = computed(() => {
+    return selectedSeatsDetails.value.filter((seat) => seat.eventId === afternoonId.value);
+  });
 
-    const afternoonTotal = computed(() => {
-      return selectedAfternoonSeats.value.length * TICKET_PRICE
-    })
+  const morningTotal = computed(() => {
+    return selectedMorningSeats.value.length * TICKET_PRICE;
+  });
 
-    const dvdTotal = computed(() => {
-      return selectedDvds.value * DVD_PRICE
-    })
-
-
-  // const selectEventDetails = (eventDetails) => {
-  //   selectedEventDetails.value = eventDetails;
-  // };
+  const afternoonTotal = computed(() => {
+    return selectedAfternoonSeats.value.length * TICKET_PRICE;
+  });
 
   const addChildInformation = (childInfo) => {
     childrenInformation.value.push(childInfo);
@@ -84,14 +84,14 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
       // update the ids of seats
       selectedSeats.value.push(seatId);
       // update the details of the seats
-      selectedSeatsDetails.value.push(seatDetails)
+      selectedSeatsDetails.value.push(seatDetails);
     } else {
       // remove the ids of seats
       selectedSeats.value = selectedSeats.value.filter((id) => id !== seatId);
       // remove the details of the seats
       selectedSeatsDetails.value = selectedSeatsDetails.value.filter((seat) => seat.id !== seatDetails.id);
     }
-  }
+  };
 
   const selectSeats = (seats) => {
     selectedSeats.value = seats;
@@ -110,10 +110,10 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
   };
 
   const clearEverything = () => {
-    console.log('clearing everything')
-    clearCheckout()
-    seatStore.clearSeatStore()
-  }
+    console.log('clearing everything');
+    clearCheckout();
+    seatStore.clearSeatStore();
+  };
 
   const clearCheckout = () => {
     userInformation.value = {};
@@ -121,23 +121,16 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     childrenInformation.value = [];
     selectedSeats.value = [];
     selectedSeatsDetails.value = [];
-    selectEventDetails.value = null
-    selectedShow.value = null
-    selectedDvds.value = 0
+    selectEventDetails.value = null;
+    selectedShow.value = null;
+    selectedDvds.value = 0;
+    selectedDigitalDownloads.value = 0;
     ticketQuantity.value = 0;
     paymentInformation.value = {};
     orderSummary.value = {};
     selectedEvent.value = null;
-    childrenInformation.value = []
+    childrenInformation.value = [];
   };
-
-  // const orderTotal = computed(() => {
-  //   // Calculate the total cost
-  //   // Example calculation (adjust according to actual data structure and needs)
-  //   const baseCost = selectedEventDetails.value.price || 0;
-  //   const totalSeatsCost = selectedSeats.value.length * baseCost;
-  //   return totalSeatsCost; // Modify as needed for more complex calculations
-  // });
 
   const isOrderComplete = computed(() => {
     // Determine if the order can be finalized
@@ -165,7 +158,6 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     selectedSeatsDetails,
     ticketNumbers,
     selectedShow,
-    // ticketQuickTotal,
     selectEventDetails,
     selectedEvent,
     morningTotal,
@@ -175,7 +167,10 @@ export const useCheckoutStore = defineStore('checkout-store', () => {
     morningId,
     afternoonId,
     dvdTotal,
+    digitalTotal,
+    discountTotal,
     selectedDvds,
+    selectedDigitalDownloads,
     clearEverything
   };
 });

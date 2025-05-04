@@ -19,7 +19,7 @@ import SeatMap from '~/components/SeatMap.vue';
 const SeatStore = useSeatStore()
 
 definePageMeta({
-  middleware: ['authenticated'],
+  middleware: ['admin'],
 });
 onMounted(async () => {
   await SeatStore.fetchEvents()

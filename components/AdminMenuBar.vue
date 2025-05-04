@@ -41,10 +41,10 @@ const items = ref([
         }
     },
     {
-        label: 'Tickets',
+        label: 'Media Orders',
         icon: 'pi pi-link',
         command: () => {
-            router.push('/admin/tickets');
+            router.push('/admin/media-orders');
         }
     },
 ]);

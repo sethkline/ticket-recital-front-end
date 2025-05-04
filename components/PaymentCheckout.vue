@@ -124,6 +124,7 @@ const handleSubmit = async () => {
         token: token.id,
         seats,
         dvds: CheckoutStore.selectedDvds,
+        digitalDownloads: CheckoutStore.selectedDigitalDownloads,
         amount: CheckoutStore.orderTotal,
         printInfo
       })
