@@ -1,5 +1,5 @@
 <template>
-    <SiteAlertBanner 
+  <SiteAlertBanner 
     severity="error"
     message="Our ticket system is temporarily unavailable. Please check your email for updates on when ticket purchasing will be available again."
     persistent
