@@ -1,12 +1,12 @@
 <template>
-  <SiteAlertBanner 
+  <!-- <SiteAlertBanner 
     severity="error"
     message="Our ticket system is temporarily unavailable. Please check your email for updates on when ticket purchasing will be available again."
     persistent
     actionText="Contact Us" 
     actionLink="mailto:support@reverencestudios.com"
     dismissKey="ticket-system-outage-may2025"
-  />
+  /> -->
   <header class="relative z-50 flex-none lg:pt-11 print:hidden">
     <Container class="flex flex-wrap items-center justify-center sm:justify-between lg:flex-nowrap">
       <div class="mt-10 lg:mt-0 lg:grow lg:basis-0">
@@ -28,9 +28,8 @@
       <Button v-if="user" text label="Logout" @click="handleLogout" />
       
       <div class="hidden sm:mt-10 sm:flex lg:mt-0 lg:grow lg:basis-0 lg:justify-end">
-        <!-- Temporarily disable tickets button during outage -->
-        <!-- <Button v-if="recitalStore.ticketSalesTime" label="Buy Tickets" @click="router.push('/purchase-tickets')" /> -->
-        <div class="text-red-600 font-semibold">Ticket system temporarily unavailable</div>
+        <Button v-if="recitalStore.ticketSalesTime" label="Buy Tickets" @click="router.push('/purchase-tickets')" />
+        <!-- <div class="text-red-600 font-semibold">Ticket system temporarily unavailable</div> -->
         <TicketSaleCountdown v-if="recital && !recitalStore.ticketSalesTime" :ticketStartDate="recital?.attributes?.ticket_sale_start" />
       </div>
     </Container>
