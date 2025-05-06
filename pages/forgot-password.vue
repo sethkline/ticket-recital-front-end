@@ -9,19 +9,19 @@
       
       <div class="mb-4">
         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-        <input 
-          type="email" 
-          id="email" 
-          v-model="email" 
-          placeholder="yourname@example.com" 
+        <input
+          type="email"
+          id="email"
+          v-model="email"
+          placeholder="yourname@example.com"
           class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
       
       <div class="mt-6">
-        <Button 
-          @click="onSubmit" 
-          :loading="loading" 
+        <Button
+          @click="onSubmit"
+          :loading="loading"
           class="w-full p-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           Reset Password
@@ -38,9 +38,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStrapiAuth } from '#imports';
-
-const { forgotPassword } = useStrapiAuth();
+const client = useStrapiClient();
 const router = useRouter();
 const email = ref('');
 const loading = ref(false);
@@ -49,9 +47,9 @@ const isSuccess = ref(false);
 
 // Compute class for message based on success state
 const messageClass = computed(() => {
-  return isSuccess.value 
-    ? 'bg-green-100 text-green-700' 
-    : 'bg-red-100 text-red-700';
+  return isSuccess.value
+     ? 'bg-green-100 text-green-700'
+     : 'bg-red-100 text-red-700';
 });
 
 const onSubmit = async () => {
@@ -68,8 +66,13 @@ const onSubmit = async () => {
     // For debugging
     console.log('Attempting password reset for:', email.value);
     
-    await forgotPassword({ email: email.value });
+    // Use the custom endpoint instead of forgotPassword
+    const data = await client('/custom/forgot-password', {
+      method: 'POST',
+      body: { email: email.value }
+    });
     
+    // The response is already JSON
     isSuccess.value = true;
     message.value = "If an account with that email exists, we have sent an email to reset your password.";
     
