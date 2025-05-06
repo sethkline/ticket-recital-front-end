@@ -10,21 +10,56 @@
       />
     </div>
     <div class="stage-label">Stage</div>
-    <div class="seatmap" v-if="Boolean(seats && seats.length)">
-      <div v-for="(section, index) in sections" :key="index" class="section" :class="getSectionClass(index)">
-        <div v-for="(rowSeats, row) in section" :key="row" class="row">
-          <span class="row-label">{{ row }}</span>
-          <Seat
-            v-for="seat in rowSeats"
-            :key="seat.id"
-            :seat="seat"
-            :showSeatNumber="isAdmin"
-            :selectUnavailable="isAdmin"
-            :hasSelectedAll="hasSelectedAll"
-            :showHandicap="showHandicap"
-            @toggle-seat="handleSeatToggle"
-            class="seat"
-          />
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color bg-green-300 border-green-500"></div>
+        <span>Available</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color bg-yellow-300 border-yellow-500"></div>
+        <span>Reserved</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color bg-red-300 border-red-500"></div>
+        <span>Unavailable</span>
+      </div>
+      <div class="legend-item" v-if="showHandicap">
+        <div class="legend-color bg-green-300 border-green-500">
+          <span class="text-sm">♿</span>
+        </div>
+        <span>Handicap Accessible</span>
+      </div>
+    </div>
+    
+    <!-- Scrollable container for mobile -->
+    <div 
+      class="seatmap-scroll" 
+      :class="{ 'mobile-view': isMobile }"
+      ref="seatmapContainer"
+    >
+      <div class="seatmap" v-if="Boolean(seats && seats.length)">
+        <div 
+          v-for="(section, index) in sections" 
+          :key="index" 
+          class="section" 
+          :class="getSectionClass(index)"
+          :id="getSectionId(index)"
+          ref="sectionRefs"
+        >
+          <div v-for="(rowSeats, row) in section" :key="row" class="row">
+            <span class="row-label">{{ row }}</span>
+            <Seat
+              v-for="seat in rowSeats"
+              :key="seat.id"
+              :seat="seat"
+              :showSeatNumber="isAdmin"
+              :selectUnavailable="isAdmin"
+              :hasSelectedAll="hasSelectedAll"
+              :showHandicap="showHandicap"
+              @toggle-seat="handleSeatToggle"
+              class="seat"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -47,6 +82,64 @@ const props = defineProps<{
   showHandicap: boolean;
   isAdmin: boolean;
 }>();
+
+// Mobile detection and section selection
+const isMobile = ref(false);
+const currentSection = ref('center-main');
+const seatmapContainer = ref(null);
+const sectionRefs = ref([]);
+
+// Check if device is mobile on mount
+onMounted(() => {
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile);
+});
+
+function checkMobile() {
+  isMobile.value = window.innerWidth < 768;
+  
+  // Default to center section on mobile
+  if (isMobile.value) {
+    currentSection.value = 'center-main';
+  }
+}
+
+// Scroll to selected section on mobile
+function scrollToSection() {
+  if (!isMobile.value || !seatmapContainer.value) return;
+  
+  // Find the section index matching the selected section value
+  const sectionMapping = {
+    'left-wing': 0,
+    'left-main': 1,
+    'center-main': 2,
+    'right-main': 3,
+    'right-wing': 4
+  };
+  
+  const sectionIndex = sectionMapping[currentSection.value];
+  
+  // Get the selected section element
+  const sectionEl = document.getElementById(getSectionId(sectionIndex));
+  
+  if (sectionEl) {
+    // Scroll the section into view with smooth animation
+    seatmapContainer.value.scrollTo({
+      left: sectionEl.offsetLeft - 20,
+      behavior: 'smooth'
+    });
+  }
+}
+
+// Get ID for section element
+function getSectionId(index) {
+  const sectionNames = ['left-wing', 'left-main', 'center-main', 'right-main', 'right-wing'];
+  return `section-${sectionNames[index]}`;
+}
 
 //admin selected seats functions
 const adminSelectItems = [
@@ -260,5 +353,29 @@ const handleSeatToggle = async (seatId: string, isSelected: boolean, revertCallb
 
 .seat {
   margin: 0 2px;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1em;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 0 0.5em;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border: 2px solid;
+  border-radius: 4px;
+  margin-right: 0.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>

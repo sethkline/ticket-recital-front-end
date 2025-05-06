@@ -2,14 +2,15 @@
   <button
     class="px-3 py-1 text-xs seat"
     :class="{
-      'bg-green-300 border-green-500 hover:bg-green-400': props.seat.attributes.is_available,
+      'bg-green-300 border-green-500 hover:bg-green-400': props.seat.attributes.is_available && !props.seat.attributes.is_reserved,
+      'bg-yellow-300 border-yellow-500 hover:bg-yellow-400': props.seat.attributes.is_available && props.seat.attributes.is_reserved,
       'bg-red-300 border-red-500': !props.seat.attributes.is_available,
       'ring-2 ring-blue-500': isSelected
     }"
     @click="handleClick"
   >
-  <span class="text-sm" v-if="props.seat?.attributes?.handicap_access">♿</span>
-  <span v-if="showSeatNumber">{{ props.seat?.attributes?.number }}</span>
+    <span class="text-sm" v-if="props.seat?.attributes?.handicap_access">♿</span>
+    <span v-if="showSeatNumber">{{ props.seat?.attributes?.number }}</span>
   </button>
 </template>
 
