@@ -7,7 +7,7 @@ export const useTimeRestrictionStore = defineStore('timeRestriction', {
       seniorTicketSalesStart: import.meta.env.VITE_SENIOR_SALES_START || '2025-05-01T09:00:00',
       volunteerTicketSalesStart: import.meta.env.VITE_VOLUNTEER_SALES_START || '2025-05-03T09:00:00',
       generalTicketSalesStart: import.meta.env.VITE_GENERAL_SALES_START || '2025-05-5T09:00:00',
-      ticketSalesEnd: import.meta.env.VITE_TICKET_SALES_END || '2025-05-16T23:59:59',
+      ticketSalesEnd: import.meta.env.VITE_TICKET_SALES_END || '2025-05-15T22:00:00',
     };
     
     // Safely check if localStorage is available
