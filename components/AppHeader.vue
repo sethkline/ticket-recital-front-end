@@ -28,9 +28,16 @@
       <Button v-if="user" text label="Logout" @click="handleLogout" />
       
       <div class="hidden sm:mt-10 sm:flex lg:mt-0 lg:grow lg:basis-0 lg:justify-end">
-        <Button v-if="recitalStore.ticketSalesTime" label="Buy Tickets" @click="router.push('/purchase-tickets')" />
-        <!-- <div class="text-red-600 font-semibold">Ticket system temporarily unavailable</div> -->
-        <TicketSaleCountdown v-if="recital && !recitalStore.ticketSalesTime" :ticketStartDate="recital?.attributes?.ticket_sale_start" />
+        <!-- Buy Tickets button when sales are active -->
+        <Button v-if="isTicketSalesActive" label="Buy Tickets" @click="router.push('/purchase-tickets')" />
+        
+        <!-- Ticket sales over message -->
+        <div v-else-if="isTicketSalesEnded" class="px-4 py-2 bg-blue-50 rounded-md border border-blue-200">
+          <span class="text-blue-800 font-medium">Ticket sales have ended</span>
+        </div>
+        
+        <!-- Countdown when sales haven't started yet -->
+        <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" />
       </div>
     </Container>
   </header>
@@ -44,10 +51,29 @@ const user = useStrapiUser();
 const recitalStore = useRecitalStore();
 const { recital } = storeToRefs(recitalStore);
 
-const ticketSalesStarted = computed(() => {
+// Check if ticket sales are active (between start and end dates)
+const isTicketSalesActive = computed(() => {
+  if (!recital.value?.attributes?.ticket_sale_start || !recital.value?.attributes?.ticket_sale_end) {
+    return false;
+  }
+  
   const now = new Date();
-  const ticketSaleStart = new Date(recital.value?.attributes?.ticket_sale_start);
-  return ticketSaleStart < now;
+  const startDate = new Date(recital.value.attributes.ticket_sale_start);
+  const endDate = new Date(recital.value.attributes.ticket_sale_end);
+  
+  return now >= startDate && now <= endDate;
+});
+
+// Check if ticket sales have ended
+const isTicketSalesEnded = computed(() => {
+  if (!recital.value?.attributes?.ticket_sale_end) {
+    return false;
+  }
+  
+  const now = new Date();
+  const endDate = new Date(recital.value.attributes.ticket_sale_end);
+  
+  return now > endDate;
 });
 
 const handleLogout = () => {
