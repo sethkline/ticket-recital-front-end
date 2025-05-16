@@ -10,9 +10,22 @@
         <div class="mt-6 space-y-6 font-display text-2xl tracking-wide text-blue-900">
           <p>Buy your Tickets for Reverence Studios 2025 Spring Recital</p>
         </div>
-        <!-- TODO add back in conditional to ticketSalesTime -->
-        <Button v-if="recitalStore.ticketSalesTime" @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden"> Get your tickets </Button>
-        <!-- <TicketSaleCountdown v-else-if="recital" :ticketStartDate="recital?.attributes?.ticket_sale_start" /> -->
+        
+        <!-- Display purchase button when tickets are on sale -->
+        <Button v-if="isTicketSalesActive" @click="$router.push('/purchase-tickets')" class="mt-10 w-full sm:hidden">
+          Get your tickets
+        </Button>
+        
+        <!-- Display countdown when sales haven't started yet -->
+        <TicketSaleCountdown v-else-if="isTicketSalesFuture && recital" 
+          :ticketStartDate="recital?.attributes?.ticket_sale_start" />
+        
+        <!-- Display message when ticket sales are over -->
+        <div v-else class="mt-10 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p class="text-lg font-medium text-blue-900">Ticket sales have ended</p>
+          <p class="text-sm text-blue-700 mt-1">Thank you for your interest in our recital. Please contact us directly for any inquiries.</p>
+        </div>
+
         <dl
           class="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 sm:mt-16 sm:gap-x-16 sm:gap-y-10 sm:text-center lg:auto-cols-auto lg:grid-flow-col lg:grid-cols-none lg:justify-start lg:text-left"
         >
@@ -36,14 +49,39 @@ const items = [
 
 const recitalStore = useRecitalStore();
 const { recital } = storeToRefs(recitalStore);
-const props =defineProps<{ coverImageUrl: string}>()
+const props = defineProps<{ coverImageUrl: string }>();
 
 const backgroundImageStyle = computed(() => {
   if (!props.coverImageUrl) {
     return '';
   }
   return `background-image: url('${props.coverImageUrl}');`;
-})
+});
+
+// Check if ticket sales are active
+const isTicketSalesActive = computed(() => {
+  if (!recital.value?.attributes?.ticket_sale_start || !recital.value?.attributes?.ticket_sale_end) {
+    return false;
+  }
+  
+  const now = new Date();
+  const startDate = new Date(recital.value.attributes.ticket_sale_start);
+  const endDate = new Date(recital.value.attributes.ticket_sale_end);
+  
+  return now >= startDate && now <= endDate;
+});
+
+// Check if ticket sales are in the future
+const isTicketSalesFuture = computed(() => {
+  if (!recital.value?.attributes?.ticket_sale_start) {
+    return false;
+  }
+  
+  const now = new Date();
+  const startDate = new Date(recital.value.attributes.ticket_sale_start);
+  
+  return now < startDate;
+});
 </script>
 
 <style scoped>
