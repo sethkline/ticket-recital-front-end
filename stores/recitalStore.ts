@@ -52,6 +52,12 @@ export const useRecitalStore = defineStore('recitalStore', () => {
 
   const fetchRecital = async() => {
     try {
+      // Skip fetching recital data on watch-recital pages since they don't need it
+      const router = useRouter();
+      if (router.currentRoute.value.path.includes('watch-recital')) {
+        return null;
+      }
+
       const response = await find('recitals');
       console.log(response, 'response')
       if (response && response.data) {
