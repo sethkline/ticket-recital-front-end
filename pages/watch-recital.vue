@@ -313,10 +313,11 @@ const validateCode = async () => {
   errorMessage.value = '';
   
   try {
+    const config = useRuntimeConfig()
     const response = await $fetch('/api/orders/validate-access-code', {
       method: 'POST',
       body: { accessCode: accessCode.value },
-      baseURL: 'http://localhost:1337'
+      baseURL: config.public.STRAPI_URL
     });
     
     if (response.valid) {
@@ -350,13 +351,14 @@ const loadVideos = async (videoType) => {
   currentView.value = videoType;
   
   try {
+    const config = useRuntimeConfig()
     const response = await $fetch('/api/orders/get-video-urls', {
       method: 'POST',
       body: { 
         accessCode: accessCode.value,
         videoType: videoType 
       },
-      baseURL: 'http://localhost:1337'
+      baseURL: config.public.STRAPI_URL
     });
     
     if (videoType === 'full' || videoType === 'both') {
