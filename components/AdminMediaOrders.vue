@@ -575,7 +575,7 @@ const openEmailDialog = (order, type = 'dvd') => {
   
   if (type === 'digital' && order.accessCode) {
     emailDetails.includeAccessCode = true;
-    emailDetails.message += `Your access code is: ${order.accessCode}\n\nYou can use this code to access your digital download at our website: https://recital.reverence.dance/watch-recital\n\n`;
+    emailDetails.message += `Your access code is: ${order.accessCode}\n\nHow to Download Your Videos:\n1. Visit: https://recital.reverence.dance/watch-recital\n2. Enter your access code in the field provided\n3. Choose your download option (Full Recital or Individual Dances)\n4. Click the download links that appear\n5. Save the videos to your computer\n\nNote: Download links expire after 24 hours but you can generate new ones anytime with your access code.\n\n`;
   }
   
   emailDetails.message += 'Thank you for your order!\n\nReverence Studios';
@@ -634,8 +634,8 @@ const confirmSendDvdEmails = () => {
 const confirmSendDigitalEmails = () => {
   bulkEmailDetails.targetOrders = 'digital';
   bulkEmailDetails.targetStatus = null;
-  bulkEmailDetails.subject = 'Your Digital Download Access';
-  bulkEmailDetails.message = 'Dear customer,\n\nYour digital download for the Reverence Studios Recital is now available.\n\nYou can access your download using the unique access code that has been assigned to your order at: https://recital.reverence.dance/watch-recital\n\nThank you for your purchase!\n\nReverence Studios';
+  bulkEmailDetails.subject = 'Your Digital Download is Ready';
+  bulkEmailDetails.message = 'Dear customer,\n\nYour digital download for the Reverence Studios Recital is now available.\n\nHow to Download Your Videos:\n1. Visit: https://recital.reverence.dance/watch-recital\n2. Enter your unique access code (sent in a previous email)\n3. Choose your download option:\n   - Full Recital (High Quality - 3.4GB)\n   - Full Recital (Standard Quality - 1.9GB)\n   - Individual Dance Performances (38 videos available)\n4. Click the download links that appear after validation\n5. Save the videos to your computer\n\nImportant Notes:\n- Download links expire after 24 hours for security\n- You can generate new download links anytime with your access code\n- For best results, use a desktop computer and high-speed internet\n- Right-click download links and select "Save Link As" for large files\n\nIf you need your access code or have any issues, please contact support@reverencestudios.com\n\nThank you for your purchase!\n\nReverence Studios';
   bulkEmailDialog.value = true;
 };
 
