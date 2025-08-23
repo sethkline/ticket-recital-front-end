@@ -192,7 +192,7 @@
     </div>
     
     <!-- Email Dialog -->
-    <Dialog v-model:visible="emailDialog" header="Send Status Email" :style="{ width: '500px' }">
+    <Dialog v-model:visible="emailDialog" header="Send Status Email" :style="{ width: '750px' }">
       <div class="p-fluid">
         <div class="field">
           <label for="emailSubject">Subject</label>
@@ -200,7 +200,7 @@
         </div>
         <div class="field">
           <label for="emailMessage">Message</label>
-          <Textarea id="emailMessage" v-model="emailDetails.message" rows="5" />
+          <Textarea id="emailMessage" v-model="emailDetails.message" rows="12" style="width: 100%; min-height: 300px;" />
         </div>
         <div v-if="emailDetails.type === 'digital' && emailDetails.order?.accessCode" class="field">
           <Checkbox v-model="emailDetails.includeAccessCode" :binary="true" id="includeAccessCode" />
@@ -214,7 +214,7 @@
     </Dialog>
     
     <!-- Bulk Email Confirmation Dialog -->
-    <Dialog v-model:visible="bulkEmailDialog" header="Send Bulk Emails" :style="{ width: '500px' }">
+    <Dialog v-model:visible="bulkEmailDialog" header="Send Bulk Emails" :style="{ width: '750px' }">
       <div class="p-fluid">
         <div class="field">
           <label for="bulkEmailSubject">Subject</label>
@@ -222,11 +222,12 @@
         </div>
         <div class="field">
           <label for="bulkEmailMessage">Message</label>
-          <Textarea id="bulkEmailMessage" v-model="bulkEmailDetails.message" rows="5" />
+          <Textarea id="bulkEmailMessage" v-model="bulkEmailDetails.message" rows="12" style="width: 100%; min-height: 300px;" />
         </div>
         <div class="field">
           <Message severity="info">
-            <span>This will send emails to {{ bulkEmailDetails.targetOrders === 'dvd' ? 'all DVD orders' : 'all digital download orders' }} with status "{{ bulkEmailDetails.targetStatus || 'any' }}".</span>
+            <span>This will send emails to {{ bulkEmailDetails.targetOrders === 'dvd' ? 'all DVD orders' : 'all digital download orders' }} with status "{{ bulkEmailDetails.targetStatus || 'any' }}".<br/>
+            <strong>Note:</strong> {name} will be replaced with each customer's actual name.<span v-if="bulkEmailDetails.targetOrders === 'digital'"><br/>{accessCode} will be replaced with each customer's access code.</span></span>
           </Message>
         </div>
       </div>
@@ -237,14 +238,15 @@
     </Dialog>
     
     <!-- Volunteer Access Dialog -->
-    <Dialog v-model:visible="volunteerDialog" header="Add Volunteer Digital Access" :style="{ width: '600px' }">
+    <Dialog v-model:visible="volunteerDialog" header="Add Volunteer Digital Access" :style="{ width: '750px' }">
       <div class="p-fluid">
         <div class="field">
           <label for="volunteerEmails">Volunteer Email Addresses</label>
           <Textarea 
             id="volunteerEmails" 
             v-model="volunteerDetails.emails" 
-            rows="8" 
+            rows="8"
+            style="width: 100%; min-height: 200px;" 
             placeholder="Enter email addresses, one per line:&#10;volunteer1@email.com&#10;volunteer2@email.com&#10;volunteer3@email.com"
           />
           <small>Enter one email address per line</small>
@@ -255,7 +257,7 @@
         </div>
         <div class="field">
           <label for="volunteerMessage">Email Message</label>
-          <Textarea id="volunteerMessage" v-model="volunteerDetails.message" rows="6" />
+          <Textarea id="volunteerMessage" v-model="volunteerDetails.message" rows="10" style="width: 100%; min-height: 250px;" />
         </div>
         <div class="field">
           <Message severity="info">
@@ -644,11 +646,11 @@ const openEmailDialog = (order, type = 'dvd') => {
   emailDetails.order = order;
   emailDetails.type = type;
   emailDetails.subject = `Your ${type === 'dvd' ? 'DVD' : 'Digital Download'} Order Status`;
-  emailDetails.message = `Dear ${order.name},\n\nYour ${type === 'dvd' ? 'DVD' : 'Digital Download'} order (#${order.id}) status is: ${order.status}.\n\n`;
+  emailDetails.message = `Dear {name},\n\nYour ${type === 'dvd' ? 'DVD' : 'Digital Download'} order (#${order.id}) status is: ${order.status}.\n\n`;
   
   if (type === 'digital' && order.accessCode) {
     emailDetails.includeAccessCode = true;
-    emailDetails.message += `Your access code is: ${order.accessCode}\n\nHow to Download Your Videos:\n1. Visit: https://recital.reverence.dance/watch-recital\n2. Enter your access code in the field provided\n3. Choose your download option (Full Recital or Individual Dances)\n4. Click the download links that appear\n5. Save the videos to your computer\n\nNote: Download links expire after 24 hours but you can generate new ones anytime with your access code.\n\n`;
+    emailDetails.message += `Your access code is: {accessCode}\n\nHow to Download Your Videos:\n1. Visit: https://recital.reverence.dance/watch-recital\n2. Enter your access code in the field provided\n3. Choose your download option (Full Recital or Individual Dances)\n4. Click the download links that appear\n5. Save the videos to your computer\n\nNote: Download links expire after 24 hours but you can generate new ones anytime with your access code.\n\n`;
   }
   
   emailDetails.message += 'Thank you for your order!\n\nReverence Studios';
@@ -700,7 +702,7 @@ const confirmSendDvdEmails = () => {
   bulkEmailDetails.targetOrders = 'dvd';
   bulkEmailDetails.targetStatus = null;
   bulkEmailDetails.subject = 'Your DVD Order Status';
-  bulkEmailDetails.message = 'Dear customer,\n\nWe wanted to update you on the status of your DVD order from Reverence Studios.\n\nYour order is being processed and will be fulfilled shortly.\n\nThank you for your order!\n\nReverence Studios';
+  bulkEmailDetails.message = 'Dear {name},\n\nWe wanted to update you on the status of your DVD order from Reverence Studios.\n\nYour order is being processed and will be fulfilled shortly.\n\nThank you for your order!\n\nReverence Studios';
   bulkEmailDialog.value = true;
 };
 
@@ -708,7 +710,7 @@ const confirmSendDigitalEmails = () => {
   bulkEmailDetails.targetOrders = 'digital';
   bulkEmailDetails.targetStatus = null;
   bulkEmailDetails.subject = 'Your Digital Download is Ready';
-  bulkEmailDetails.message = 'Dear customer,\n\nYour digital download for the Reverence Studios Recital is now available.\n\nHow to Download Your Videos:\n1. Visit: https://recital.reverence.dance/watch-recital\n2. Enter your unique access code (sent in a previous email)\n3. Choose your download option:\n   - Full Recital (High Quality - 3.4GB)\n   - Full Recital (Standard Quality - 1.9GB)\n   - Individual Dance Performances (38 videos available)\n4. Click the download links that appear after validation\n5. Save the videos to your computer\n\nImportant Notes:\n- Download links expire after 24 hours for security\n- You can generate new download links anytime with your access code\n- For best results, use a desktop computer and high-speed internet\n- Right-click download links and select "Save Link As" for large files\n\nIf you need your access code or have any issues, please contact support@reverencestudios.com\n\nThank you for your purchase!\n\nReverence Studios';
+  bulkEmailDetails.message = 'Dear {name},\n\nYour digital download for the Reverence Studios Recital is now available.\n\nYour Access Code: {accessCode}\n\nHow to Download Your Videos:\n1. Visit: https://recital.reverence.dance/watch-recital\n2. Enter your access code above in the field provided\n3. Choose your download option:\n   - Full Recital (High Quality - 3.4GB)\n   - Full Recital (Standard Quality - 1.9GB)\n   - Individual Dance Performances (38 videos available)\n4. Click the download links that appear after validation\n5. Save the videos to your computer\n\nImportant Notes:\n- Download links expire after 24 hours for security\n- You can generate new download links anytime with your access code\n- For best results, use a desktop computer and high-speed internet\n- Right-click download links and select "Save Link As" for large files\n\nIf you have any issues downloading, please contact support@reverencestudios.com\n\nThank you for your purchase!\n\nReverence Studios';
   bulkEmailDialog.value = true;
 };
 
