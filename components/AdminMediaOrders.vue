@@ -96,6 +96,7 @@
               <div class="flex space-x-2">
                 <Button label="Export CSV" icon="pi pi-file-excel" @click="exportDigitalOrdersCsv" />
                 <Button label="Generate Access Codes" icon="pi pi-key" @click="generateAccessCodes" severity="secondary" />
+                <Button label="Add Volunteer Access" icon="pi pi-users" @click="openVolunteerDialog" severity="info" />
                 <Button label="Send Access Emails" icon="pi pi-envelope" @click="confirmSendDigitalEmails" severity="secondary" />
               </div>
             </div>
@@ -234,6 +235,45 @@
         <Button label="Send" icon="pi pi-envelope" @click="sendBulkEmails" />
       </template>
     </Dialog>
+    
+    <!-- Volunteer Access Dialog -->
+    <Dialog v-model:visible="volunteerDialog" header="Add Volunteer Digital Access" :style="{ width: '600px' }">
+      <div class="p-fluid">
+        <div class="field">
+          <label for="volunteerEmails">Volunteer Email Addresses</label>
+          <Textarea 
+            id="volunteerEmails" 
+            v-model="volunteerDetails.emails" 
+            rows="8" 
+            placeholder="Enter email addresses, one per line:&#10;volunteer1@email.com&#10;volunteer2@email.com&#10;volunteer3@email.com"
+          />
+          <small>Enter one email address per line</small>
+        </div>
+        <div class="field">
+          <label for="volunteerSubject">Email Subject</label>
+          <InputText id="volunteerSubject" v-model="volunteerDetails.subject" />
+        </div>
+        <div class="field">
+          <label for="volunteerMessage">Email Message</label>
+          <Textarea id="volunteerMessage" v-model="volunteerDetails.message" rows="6" />
+        </div>
+        <div class="field">
+          <Message severity="info">
+            <span>This will create access codes for {{ getVolunteerEmailCount() }} volunteer{{ getVolunteerEmailCount() !== 1 ? 's' : '' }} and send them digital download access.</span>
+          </Message>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" @click="closeVolunteerDialog" class="p-button-text" />
+        <Button 
+          label="Create Access & Send Emails" 
+          icon="pi pi-send" 
+          @click="createVolunteerAccess" 
+          :disabled="!volunteerDetails.emails.trim()"
+          :loading="loading"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -284,6 +324,39 @@ const bulkEmailDetails = reactive({
   targetStatus: null, // if null, all statuses
   subject: '',
   message: ''
+});
+
+// Volunteer dialog
+const volunteerDialog = ref(false);
+const volunteerDetails = reactive({
+  emails: '',
+  subject: 'Your Digital Download Access - Reverence Studios Recital',
+  message: `Dear Volunteer,
+
+Thank you for volunteering with Reverence Studios! As a token of our appreciation, you now have complimentary access to download the full recital recording.
+
+How to Download Your Videos:
+1. Visit: https://recital.reverence.dance/watch-recital
+2. Enter your access code (provided below)
+3. Choose your download option:
+   - Full Recital (High Quality - 3.4GB)
+   - Full Recital (Standard Quality - 1.9GB)
+   - Individual Dance Performances (38 videos available)
+4. Click the download links that appear after validation
+5. Save the videos to your computer
+
+Important Notes:
+- Download links expire after 24 hours for security
+- You can generate new download links anytime with your access code
+- For best results, use a desktop computer and high-speed internet
+- Right-click download links and select "Save Link As" for large files
+
+If you have any issues downloading, please contact support@reverencestudios.com
+
+Thank you again for your dedication to Reverence Studios!
+
+Best regards,
+Reverence Studios Team`
 });
 
 // Fetch data
@@ -673,6 +746,76 @@ const sendBulkEmails = async () => {
       severity: 'error',
       summary: 'Error',
       detail: 'Failed to send bulk emails',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Volunteer functions
+const openVolunteerDialog = () => {
+  volunteerDialog.value = true;
+};
+
+const closeVolunteerDialog = () => {
+  volunteerDialog.value = false;
+  volunteerDetails.emails = '';
+};
+
+const getVolunteerEmailCount = () => {
+  if (!volunteerDetails.emails.trim()) return 0;
+  return volunteerDetails.emails.trim().split('\n').filter(email => email.trim()).length;
+};
+
+const createVolunteerAccess = async () => {
+  try {
+    loading.value = true;
+    
+    // Parse email addresses
+    const emailList = volunteerDetails.emails
+      .trim()
+      .split('\n')
+      .map(email => email.trim())
+      .filter(email => email && email.includes('@'));
+    
+    if (emailList.length === 0) {
+      toast.add({
+        severity: 'warn',
+        summary: 'No Valid Emails',
+        detail: 'Please enter at least one valid email address',
+        life: 3000
+      });
+      return;
+    }
+    
+    // Send volunteer access request to API
+    const response = await client('/orders/create-volunteer-access', {
+      method: 'POST',
+      body: JSON.stringify({
+        emails: emailList,
+        subject: volunteerDetails.subject,
+        message: volunteerDetails.message
+      }),
+    });
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Volunteer Access Created',
+      detail: `Created access codes for ${response.count} volunteers and sent emails`,
+      life: 5000
+    });
+    
+    // Refresh orders to show new volunteer entries
+    await fetchOrders();
+    
+    closeVolunteerDialog();
+  } catch (error) {
+    console.error('Error creating volunteer access:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to create volunteer access codes',
       life: 3000
     });
   } finally {
