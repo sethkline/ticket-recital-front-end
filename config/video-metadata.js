@@ -21,7 +21,7 @@ module.exports = {
       }
     },
     
-    // Individual dance performances (39 total from Backblaze)
+    // Individual dance performances (38 total from Backblaze)
     dances: [
       {
         id: 1,
@@ -278,7 +278,7 @@ module.exports = {
       {
         id: 29,
         title: "Hit Me Up",
-        category: "Tap 3",
+        category: "Tap 3 (Alternative)",
         filePath: "recital-2025/dances/tap3__hit-me-up.mp4",
         fileSize: "57.1MB",
         performers: "Tap Level 3",
@@ -332,7 +332,7 @@ module.exports = {
       {
         id: 35,
         title: "El Shaddai",
-        category: "Wednesday AM Primary Ballet",
+        category: "Wednesday AM Primary Ballet (2)",
         filePath: "recital-2025/dances/wednesday-am-primary-ballet__el-shaddai.mp4",
         fileSize: "51.6MB",
         performers: "Wednesday AM Primary Ballet",
