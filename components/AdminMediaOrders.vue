@@ -95,6 +95,7 @@
               <h2 class="text-2xl font-bold">Digital Downloads</h2>
               <div class="flex space-x-2">
                 <Button label="Export CSV" icon="pi pi-file-excel" @click="exportDigitalOrdersCsv" />
+                <Button label="Create Payment Link" icon="pi pi-link" @click="openPaymentLinkDialog" severity="success" />
                 <Button label="Generate Access Codes" icon="pi pi-key" @click="generateAccessCodes" severity="secondary" />
                 <Button label="Add Volunteer Access" icon="pi pi-users" @click="openVolunteerDialog" severity="info" />
                 <Button label="Send Access Emails" icon="pi pi-envelope" @click="confirmSendDigitalEmails" severity="secondary" />
@@ -181,6 +182,122 @@
                       @click="openEmailDialog(slotProps.data, 'digital')" 
                       class="p-button-sm p-button-info" 
                       v-tooltip.top="'Send Email'"
+                    />
+                  </div>
+                </template>
+              </Column>
+            </DataTable>
+          </div>
+        </TabPanel>
+        
+        <TabPanel header="Payment Links">
+          <div class="mb-4">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-bold">Payment Links</h2>
+              <div class="flex space-x-2">
+                <Button label="Create New Payment Link" icon="pi pi-plus" @click="openPaymentLinkDialog" severity="success" />
+                <Button label="Refresh" icon="pi pi-refresh" @click="fetchPaymentLinks" :loading="loading" />
+              </div>
+            </div>
+            
+            <DataTable 
+              :value="paymentLinks" 
+              :paginator="true" 
+              :rows="10"
+              :rowsPerPageOptions="[5, 10, 25, 50]"
+              v-model:filters="paymentLinkFilters"
+              filterDisplay="row"
+              dataKey="id"
+              :loading="loading"
+              class="p-datatable-sm"
+              :rowClass="getPaymentLinkRowClass"
+            >
+              <Column field="customer_name" header="Customer Name" sortable :showFilterMenu="false">
+                <template #filter="{ filterModel, filterCallback }">
+                  <InputText v-model="filterModel.value" @input="filterCallback()" placeholder="Search by name" class="p-column-filter" />
+                </template>
+              </Column>
+              <Column field="customer_email" header="Email" sortable :showFilterMenu="false">
+                <template #filter="{ filterModel, filterCallback }">
+                  <InputText v-model="filterModel.value" @input="filterCallback()" placeholder="Search by email" class="p-column-filter" />
+                </template>
+              </Column>
+              <Column field="amount" header="Amount">
+                <template #body="slotProps">
+                  ${{ slotProps.data.amount }}
+                </template>
+              </Column>
+              <Column field="status" header="Status" sortable>
+                <template #body="slotProps">
+                  <Tag :severity="getPaymentLinkStatusSeverity(slotProps.data.status)" :value="slotProps.data.status" />
+                </template>
+                <template #filter="{ filterModel, filterCallback }">
+                  <Dropdown 
+                    v-model="filterModel.value" 
+                    @change="filterCallback()"
+                    :options="paymentLinkStatusOptions" 
+                    placeholder="Select Status"
+                    class="p-column-filter" 
+                    showClear 
+                  />
+                </template>
+              </Column>
+              <Column field="createdAt" header="Created" sortable>
+                <template #body="slotProps">
+                  {{ formatDate(slotProps.data.createdAt) }}
+                </template>
+              </Column>
+              <Column field="expires_at" header="Expires" sortable>
+                <template #body="slotProps">
+                  <span :class="{ 'text-red-500': new Date(slotProps.data.expires_at) < new Date() && slotProps.data.status === 'pending' }">
+                    {{ formatDate(slotProps.data.expires_at) }}
+                  </span>
+                </template>
+              </Column>
+              <Column header="Link / Access Code">
+                <template #body="slotProps">
+                  <div class="flex items-center" v-if="slotProps.data.status === 'completed' && slotProps.data.order?.access_code">
+                    <span class="text-xs font-mono text-green-600 mr-2">{{ slotProps.data.order.access_code }}</span>
+                    <Button 
+                      icon="pi pi-copy" 
+                      @click="copyAccessCode(slotProps.data.order.access_code)" 
+                      class="p-button-text p-button-sm" 
+                      v-tooltip.top="'Copy access code'"
+                    />
+                  </div>
+                  <div class="flex items-center" v-else>
+                    <span class="text-xs mr-2">...{{ slotProps.data.token?.slice(-8) }}</span>
+                    <Button 
+                      icon="pi pi-copy" 
+                      @click="copyPaymentLink(slotProps.data.token)" 
+                      class="p-button-text p-button-sm" 
+                      v-tooltip.top="'Copy link'"
+                    />
+                  </div>
+                </template>
+              </Column>
+              <Column header="Actions">
+                <template #body="slotProps">
+                  <div class="flex">
+                    <Button 
+                      icon="pi pi-envelope" 
+                      @click="resendPaymentLink(slotProps.data)" 
+                      class="p-button-sm p-button-info mr-2" 
+                      v-tooltip.top="'Resend Email'"
+                      :disabled="slotProps.data.status !== 'pending'"
+                    />
+                    <Button 
+                      icon="pi pi-eye" 
+                      @click="viewPaymentLinkDetails(slotProps.data)" 
+                      class="p-button-sm p-button-secondary mr-2" 
+                      v-tooltip.top="'View Details'"
+                    />
+                    <Button 
+                      icon="pi pi-times" 
+                      @click="cancelPaymentLink(slotProps.data)" 
+                      class="p-button-sm p-button-danger" 
+                      v-tooltip.top="'Cancel Link'"
+                      :disabled="slotProps.data.status !== 'pending'"
                     />
                   </div>
                 </template>
@@ -276,6 +393,126 @@
         />
       </template>
     </Dialog>
+    
+    <!-- Payment Link Dialog -->
+    <Dialog v-model:visible="paymentLinkDialog" header="Create Payment Link" :style="{ width: '750px' }">
+      <div class="p-fluid">
+        <div class="field">
+          <label for="paymentLinkEmail">Customer Email *</label>
+          <InputText 
+            id="paymentLinkEmail" 
+            v-model="paymentLinkForm.customer_email" 
+            placeholder="customer@email.com"
+            :class="{ 'p-invalid': paymentLinkErrors.customer_email }"
+          />
+          <small class="p-error" v-if="paymentLinkErrors.customer_email">{{ paymentLinkErrors.customer_email }}</small>
+        </div>
+        <div class="field">
+          <label for="paymentLinkName">Customer Name *</label>
+          <InputText 
+            id="paymentLinkName" 
+            v-model="paymentLinkForm.customer_name" 
+            placeholder="John Doe"
+            :class="{ 'p-invalid': paymentLinkErrors.customer_name }"
+          />
+          <small class="p-error" v-if="paymentLinkErrors.customer_name">{{ paymentLinkErrors.customer_name }}</small>
+        </div>
+        <div class="field">
+          <label for="paymentLinkPhone">Phone Number (Optional)</label>
+          <InputText 
+            id="paymentLinkPhone" 
+            v-model="paymentLinkForm.customer_phone" 
+            placeholder="(555) 123-4567"
+          />
+        </div>
+        <div class="field">
+          <label for="paymentLinkExpiry">Link Expiry</label>
+          <Dropdown 
+            id="paymentLinkExpiry"
+            v-model="paymentLinkForm.expiry_days" 
+            :options="expiryOptions" 
+            optionLabel="label" 
+            optionValue="value"
+            placeholder="Select expiry time"
+          />
+        </div>
+        <div class="field">
+          <label for="paymentLinkMessage">Custom Message (Optional)</label>
+          <Textarea 
+            id="paymentLinkMessage" 
+            v-model="paymentLinkForm.custom_message" 
+            rows="4" 
+            placeholder="Add a personal message for the customer (optional)"
+          />
+        </div>
+        <div class="field">
+          <Checkbox v-model="paymentLinkForm.send_email" :binary="true" id="sendPaymentLinkEmail" />
+          <label for="sendPaymentLinkEmail" class="ml-2">Send payment link via email</label>
+        </div>
+        <div class="field">
+          <Message severity="info">
+            <span>This will create a payment link for <strong>${{ paymentLinkForm.amount }}</strong> that the customer can use to purchase digital download access.</span>
+          </Message>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" @click="closePaymentLinkDialog" class="p-button-text" />
+        <Button 
+          label="Create Payment Link" 
+          icon="pi pi-check" 
+          @click="createPaymentLink" 
+          :loading="loading"
+          :disabled="!paymentLinkForm.customer_email || !paymentLinkForm.customer_name"
+        />
+      </template>
+    </Dialog>
+    
+    <!-- Payment Link Details Dialog -->
+    <Dialog v-model:visible="paymentLinkDetailsDialog" header="Payment Link Details" :style="{ width: '750px' }">
+      <div v-if="selectedPaymentLink">
+        <div class="grid">
+          <div class="col-6">
+            <p><strong>Customer:</strong> {{ selectedPaymentLink.customer_name }}</p>
+            <p><strong>Email:</strong> {{ selectedPaymentLink.customer_email }}</p>
+            <p><strong>Phone:</strong> {{ selectedPaymentLink.customer_phone || 'N/A' }}</p>
+          </div>
+          <div class="col-6">
+            <p><strong>Status:</strong> <Tag :severity="getPaymentLinkStatusSeverity(selectedPaymentLink.status)" :value="selectedPaymentLink.status" /></p>
+            <p><strong>Created:</strong> {{ formatDate(selectedPaymentLink.createdAt) }}</p>
+            <p><strong>Expires:</strong> {{ formatDate(selectedPaymentLink.expires_at) }}</p>
+          </div>
+        </div>
+        
+        <div class="mt-4">
+          <p><strong>Payment Link:</strong></p>
+          <div class="flex items-center gap-2 p-2 bg-gray-100 rounded">
+            <InputText :value="getFullPaymentLink(selectedPaymentLink.token)" readonly class="flex-1" />
+            <Button icon="pi pi-copy" @click="copyPaymentLink(selectedPaymentLink.token)" v-tooltip="'Copy link'" />
+          </div>
+        </div>
+        
+        <div v-if="selectedPaymentLink.custom_message" class="mt-4">
+          <p><strong>Custom Message:</strong></p>
+          <p class="p-2 bg-gray-100 rounded">{{ selectedPaymentLink.custom_message }}</p>
+        </div>
+        
+        <div v-if="selectedPaymentLink.access_logs && selectedPaymentLink.access_logs.length > 0" class="mt-4">
+          <p><strong>Access Logs:</strong></p>
+          <DataTable :value="selectedPaymentLink.access_logs" class="p-datatable-sm">
+            <Column field="accessed_at" header="Time">
+              <template #body="slotProps">
+                {{ formatDateTime(slotProps.data.accessed_at) }}
+              </template>
+            </Column>
+            <Column field="action" header="Action" />
+            <Column field="ip_address" header="IP Address" />
+          </DataTable>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Close" icon="pi pi-times" @click="closePaymentLinkDetailsDialog" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -361,9 +598,47 @@ Best regards,
 Reverence Studios Team`
 });
 
+// Payment Link data
+const paymentLinks = ref([]);
+const paymentLinkDialog = ref(false);
+const paymentLinkDetailsDialog = ref(false);
+const selectedPaymentLink = ref(null);
+
+const paymentLinkForm = reactive({
+  customer_email: '',
+  customer_name: '',
+  customer_phone: '',
+  custom_message: '',
+  expiry_days: 7,
+  send_email: true,
+  amount: 20.00
+});
+
+const paymentLinkErrors = reactive({
+  customer_email: '',
+  customer_name: ''
+});
+
+const paymentLinkFilters = ref({
+  customer_name: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  customer_email: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  status: { value: null, matchMode: FilterMatchMode.EQUALS }
+});
+
+const paymentLinkStatusOptions = ['pending', 'processing', 'completed', 'expired', 'failed'];
+
+const expiryOptions = [
+  { label: '24 hours', value: 1 },
+  { label: '3 days', value: 3 },
+  { label: '7 days', value: 7 },
+  { label: '14 days', value: 14 },
+  { label: '30 days', value: 30 }
+];
+
 // Fetch data
 onMounted(async () => {
   await fetchOrders();
+  await fetchPaymentLinks();
 });
 
 const fetchOrders = async () => {
@@ -823,6 +1098,272 @@ const createVolunteerAccess = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Payment Link methods
+const fetchPaymentLinks = async () => {
+  loading.value = true;
+  try {
+    const response = await client('/payment-links', {
+      method: 'GET',
+    });
+    
+    // Handle both direct array response and wrapped response
+    paymentLinks.value = Array.isArray(response) ? response : (response.data || []);
+  } catch (error) {
+    console.error('Error fetching payment links:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to fetch payment links',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const openPaymentLinkDialog = () => {
+  // Reset form
+  paymentLinkForm.customer_email = '';
+  paymentLinkForm.customer_name = '';
+  paymentLinkForm.customer_phone = '';
+  paymentLinkForm.custom_message = '';
+  paymentLinkForm.expiry_days = 7;
+  paymentLinkForm.send_email = true;
+  
+  // Clear errors
+  paymentLinkErrors.customer_email = '';
+  paymentLinkErrors.customer_name = '';
+  
+  paymentLinkDialog.value = true;
+};
+
+const closePaymentLinkDialog = () => {
+  paymentLinkDialog.value = false;
+};
+
+const validatePaymentLinkForm = () => {
+  let isValid = true;
+  
+  // Reset errors
+  paymentLinkErrors.customer_email = '';
+  paymentLinkErrors.customer_name = '';
+  
+  // Validate email
+  if (!paymentLinkForm.customer_email) {
+    paymentLinkErrors.customer_email = 'Email is required';
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(paymentLinkForm.customer_email)) {
+    paymentLinkErrors.customer_email = 'Please enter a valid email';
+    isValid = false;
+  }
+  
+  // Validate name
+  if (!paymentLinkForm.customer_name) {
+    paymentLinkErrors.customer_name = 'Name is required';
+    isValid = false;
+  }
+  
+  return isValid;
+};
+
+const createPaymentLink = async () => {
+  if (!validatePaymentLinkForm()) {
+    return;
+  }
+  
+  loading.value = true;
+  try {
+    const response = await client('/payment-links/create', {
+      method: 'POST',
+      body: JSON.stringify(paymentLinkForm)
+    });
+    
+    // Show success with payment link
+    const paymentUrl = getFullPaymentLink(response.token);
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Payment Link Created',
+      detail: 'Link copied to clipboard!',
+      life: 5000
+    });
+    
+    // Copy to clipboard automatically
+    await navigator.clipboard.writeText(paymentUrl);
+    
+    // Refresh payment links list
+    await fetchPaymentLinks();
+    
+    closePaymentLinkDialog();
+    
+    // If email was sent, show additional confirmation
+    if (paymentLinkForm.send_email) {
+      toast.add({
+        severity: 'info',
+        summary: 'Email Sent',
+        detail: `Payment link sent to ${paymentLinkForm.customer_email}`,
+        life: 3000
+      });
+    }
+  } catch (error) {
+    console.error('Error creating payment link:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to create payment link',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const getFullPaymentLink = (token) => {
+  const baseUrl = window.location.origin;
+  return `${baseUrl}/purchase-digital/${token}`;
+};
+
+const copyPaymentLink = async (token) => {
+  const url = getFullPaymentLink(token);
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.add({
+      severity: 'success',
+      summary: 'Copied',
+      detail: 'Payment link copied to clipboard',
+      life: 3000
+    });
+  } catch (error) {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to copy link',
+      life: 3000
+    });
+  }
+};
+
+const resendPaymentLink = async (paymentLink) => {
+  loading.value = true;
+  try {
+    await client(`/payment-links/resend/${paymentLink.token}`, {
+      method: 'POST'
+    });
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Email Sent',
+      detail: `Payment link resent to ${paymentLink.customer_email}`,
+      life: 3000
+    });
+  } catch (error) {
+    console.error('Error resending payment link:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to resend payment link',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const viewPaymentLinkDetails = async (paymentLink) => {
+  loading.value = true;
+  try {
+    const response = await client(`/payment-links/admin/${paymentLink.token}`, {
+      method: 'GET'
+    });
+    
+    selectedPaymentLink.value = response;
+    paymentLinkDetailsDialog.value = true;
+  } catch (error) {
+    console.error('Error fetching payment link details:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to fetch payment link details',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const closePaymentLinkDetailsDialog = () => {
+  paymentLinkDetailsDialog.value = false;
+  selectedPaymentLink.value = null;
+};
+
+const cancelPaymentLink = async (paymentLink) => {
+  loading.value = true;
+  try {
+    await client(`/payment-links/cancel/${paymentLink.token}`, {
+      method: 'POST'
+    });
+    
+    toast.add({
+      severity: 'success',
+      summary: 'Link Cancelled',
+      detail: 'Payment link has been cancelled',
+      life: 3000
+    });
+    
+    // Refresh list
+    await fetchPaymentLinks();
+  } catch (error) {
+    console.error('Error cancelling payment link:', error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to cancel payment link',
+      life: 3000
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const getPaymentLinkStatusSeverity = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'completed':
+      return 'success';
+    case 'pending':
+      return 'info';
+    case 'processing':
+      return 'warning';
+    case 'expired':
+      return 'secondary';
+    case 'failed':
+      return 'danger';
+    default:
+      return 'info';
+  }
+};
+
+const getPaymentLinkRowClass = (data) => {
+  const status = data.status?.toLowerCase();
+  return {
+    'bg-green-50': status === 'completed',
+    'bg-yellow-50': status === 'processing',
+    'bg-gray-50': status === 'expired',
+    'bg-red-50': status === 'failed'
+  };
+};
+
+const formatDateTime = (datetime) => {
+  if (!datetime) return '';
+  const d = new Date(datetime);
+  return d.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 definePageMeta({
