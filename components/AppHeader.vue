@@ -4,7 +4,7 @@
     message="Our ticket system is temporarily unavailable. Please check your email for updates on when ticket purchasing will be available again."
     persistent
     actionText="Contact Us" 
-    actionLink="mailto:support@reverencestudios.com"
+    actionLink="mailto:kirsten@reverencestudios.com"
     dismissKey="ticket-system-outage-may2025"
   /> -->
   <header class="relative z-50 flex-none lg:pt-11 print:hidden">
